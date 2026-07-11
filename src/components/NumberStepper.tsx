@@ -23,7 +23,7 @@ export function NumberStepper({ label, value, onChange, min, max, step = 1, unit
       <Text style={styles.label}>{label}</Text>
       <View style={styles.controls}>
         <Pressable
-          style={styles.button}
+          style={[styles.button, value <= min && styles.buttonDisabled]}
           onPress={() => onChange(clamp(value - step))}
           disabled={value <= min}
         >
@@ -34,7 +34,7 @@ export function NumberStepper({ label, value, onChange, min, max, step = 1, unit
           {unit ? ` ${unit}` : ''}
         </Text>
         <Pressable
-          style={styles.button}
+          style={[styles.button, value >= max && styles.buttonDisabled]}
           onPress={() => onChange(clamp(value + step))}
           disabled={value >= max}
         >
@@ -67,9 +67,12 @@ function createStyles(colors: ThemeColors) {
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: colors.disabledSurface,
+      backgroundColor: colors.controlSurface,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    buttonDisabled: {
+      backgroundColor: colors.disabledSurface,
     },
     buttonText: {
       color: colors.accent,
