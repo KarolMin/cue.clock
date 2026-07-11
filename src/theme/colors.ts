@@ -1,7 +1,7 @@
 export interface ThemeColors {
   background: string;
   surface: string;
-  surfaceActive: string;
+  controlSurface: string;
   text: string;
   textSecondary: string;
   accent: string;
@@ -12,13 +12,16 @@ export interface ThemeColors {
   placeholder: string;
   disabledSurface: string;
   disabledText: string;
+  player1: string;
+  player2: string;
 }
 
-// Accent is a classic billiard cloth green, tuned separately per theme for contrast.
+// Accent (active/enabled state) is a classic billiard cloth green.
+// Player identity colors (red / blue) mark whose panel is active.
 export const darkColors: ThemeColors = {
   background: '#000000',
   surface: '#121212',
-  surfaceActive: '#0d2018',
+  controlSurface: '#2a2f3a',
   text: '#ffffff',
   textSecondary: '#9aa0aa',
   accent: '#22c55e',
@@ -29,12 +32,14 @@ export const darkColors: ThemeColors = {
   placeholder: '#5a6070',
   disabledSurface: '#2a2f3a',
   disabledText: '#5a6070',
+  player1: '#f24141',
+  player2: '#3b82f6',
 };
 
 export const lightColors: ThemeColors = {
   background: '#ffffff',
   surface: '#f2f3f5',
-  surfaceActive: '#e5f6ea',
+  controlSurface: '#e2e4e8',
   text: '#14171a',
   textSecondary: '#5b6270',
   accent: '#0f7a3d',
@@ -45,4 +50,6 @@ export const lightColors: ThemeColors = {
   placeholder: '#9098a3',
   disabledSurface: '#dde0e4',
   disabledText: '#9aa0aa',
+  player1: '#dc2626',
+  player2: '#2563eb',
 };

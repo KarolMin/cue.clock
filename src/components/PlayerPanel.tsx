@@ -5,6 +5,7 @@ import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
   name: string;
+  accentColor: string;
   isActive: boolean;
   extensionsUsed: number;
   extensionsPerGame: number;
@@ -14,6 +15,7 @@ interface Props {
 
 export function PlayerPanel({
   name,
+  accentColor,
   isActive,
   extensionsUsed,
   extensionsPerGame,
@@ -25,8 +27,16 @@ export function PlayerPanel({
   const extensionsLeft = extensionsPerGame - extensionsUsed;
 
   return (
-    <View style={[styles.panel, isActive && styles.panelActive]}>
-      <Text style={[styles.name, isActive && styles.nameActive]} numberOfLines={1}>
+    <View
+      style={[
+        styles.panel,
+        isActive && { borderColor: accentColor, backgroundColor: `${accentColor}1a` },
+      ]}
+    >
+      <Text
+        style={[styles.name, isActive && { color: accentColor, fontWeight: '700' }]}
+        numberOfLines={1}
+      >
         {name}
       </Text>
       {extensionsPerGame > 0 && (
@@ -63,18 +73,11 @@ function createStyles(colors: ThemeColors) {
       borderWidth: 2,
       borderColor: 'transparent',
     },
-    panelActive: {
-      borderColor: colors.accent,
-      backgroundColor: colors.surfaceActive,
-    },
     name: {
       color: colors.textSecondary,
       fontSize: 16,
       fontWeight: '600',
       marginBottom: 8,
-    },
-    nameActive: {
-      color: colors.text,
     },
     dotsRow: {
       flexDirection: 'row',

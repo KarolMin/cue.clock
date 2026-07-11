@@ -3,12 +3,22 @@ import { Settings } from '../types/settings';
 
 export type PlayerId = 1 | 2;
 
+export interface GameLogEntry {
+  gameNumber: number;
+  winner: PlayerId;
+  extensionsUsed: Record<PlayerId, number>;
+}
+
 export interface MatchState {
   currentPlayer: PlayerId;
   gameNumber: number;
   shotRemainingMs: number;
   totalRemainingMs: number | null;
   extensionsUsed: Record<PlayerId, number>;
+  totalExtensionsUsed: Record<PlayerId, number>;
+  totalFouls: Record<PlayerId, number>;
+  score: Record<PlayerId, number>;
+  gamesLog: GameLogEntry[];
   isRunning: boolean;
   isExpired: boolean;
   isMatchTimeExpired: boolean;
@@ -29,6 +39,10 @@ function initialState(settings: Settings): MatchState {
     shotRemainingMs: settings.shotSeconds * 1000,
     totalRemainingMs: settings.totalMatchEnabled ? settings.totalMatchMinutes * 60 * 1000 : null,
     extensionsUsed: { 1: 0, 2: 0 },
+    totalExtensionsUsed: { 1: 0, 2: 0 },
+    totalFouls: { 1: 0, 2: 0 },
+    score: { 1: 0, 2: 0 },
+    gamesLog: [],
     isRunning: false,
     isExpired: false,
     isMatchTimeExpired: false,
@@ -79,6 +93,9 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           isExpired: prev.isExpired || shotJustExpired,
           isMatchTimeExpired: prev.isMatchTimeExpired || matchJustExpired,
           isRunning: shotJustExpired || matchJustExpired ? false : prev.isRunning,
+          totalFouls: shotJustExpired
+            ? { ...prev.totalFouls, [prev.currentPlayer]: prev.totalFouls[prev.currentPlayer] + 1 }
+            : prev.totalFouls,
         };
       });
     }, TICK_MS);
@@ -92,6 +109,15 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
       return { ...prev, isRunning: !prev.isRunning };
     });
   }, []);
+
+  const newShot = useCallback(() => {
+    warningFiredRef.current = false;
+    setState((prev) => ({
+      ...prev,
+      shotRemainingMs: settings.shotSeconds * 1000,
+      isExpired: false,
+    }));
+  }, [settings.shotSeconds]);
 
   const switchPlayer = useCallback(() => {
     warningFiredRef.current = false;
@@ -112,21 +138,33 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         ...prev,
         shotRemainingMs: prev.shotRemainingMs + settings.extensionSeconds * 1000,
         extensionsUsed: { ...prev.extensionsUsed, [prev.currentPlayer]: used + 1 },
+        totalExtensionsUsed: {
+          ...prev.totalExtensionsUsed,
+          [prev.currentPlayer]: prev.totalExtensionsUsed[prev.currentPlayer] + 1,
+        },
       };
     });
   }, [settings.extensionsPerGame, settings.extensionSeconds]);
 
-  const newGame = useCallback(() => {
-    warningFiredRef.current = false;
-    setState((prev) => ({
-      ...prev,
-      gameNumber: prev.gameNumber + 1,
-      shotRemainingMs: settings.shotSeconds * 1000,
-      extensionsUsed: { 1: 0, 2: 0 },
-      isExpired: false,
-      isRunning: false,
-    }));
-  }, [settings.shotSeconds]);
+  const endGame = useCallback(
+    (winner: PlayerId) => {
+      warningFiredRef.current = false;
+      setState((prev) => ({
+        ...prev,
+        score: { ...prev.score, [winner]: prev.score[winner] + 1 },
+        gamesLog: [
+          ...prev.gamesLog,
+          { gameNumber: prev.gameNumber, winner, extensionsUsed: prev.extensionsUsed },
+        ],
+        gameNumber: prev.gameNumber + 1,
+        shotRemainingMs: settings.shotSeconds * 1000,
+        extensionsUsed: { 1: 0, 2: 0 },
+        isExpired: false,
+        isRunning: false,
+      }));
+    },
+    [settings.shotSeconds]
+  );
 
-  return { state, toggleRunning, switchPlayer, useExtension, newGame };
+  return { state, toggleRunning, newShot, switchPlayer, useExtension, endGame };
 }

@@ -22,10 +22,20 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    (brak przedłużeń) lub więcej.
 5. **Zmiana zawodnika** — ręczny przycisk sędziego/gracza przełącza aktywnego
    zawodnika i resetuje zegar uderzenia do pełnej wartości.
-6. **Nowa partia** — resetuje licznik wykorzystanych przedłużeń obu graczy
-   (bo przedłużenie przysługuje na partię) oraz zegar uderzenia; nie zeruje
-   łącznego czasu meczu.
-7. **Reset meczu** — powrót do ekranu ustawień, koniec bieżącego meczu.
+6. **Nowe uderzenie** — resetuje zegar uderzenia do pełnej wartości bez
+   zmiany zawodnika na ruchu (kontynuacja tej samej kolejki po skutecznym
+   uderzeniu), dostępne również w trakcie odliczania.
+6a. **Zakończenie partii** — wskazanie zwycięzcy partii (dwa przyciski, po
+   jednym na gracza) inkrementuje wynik meczu, pokazuje krótkie podsumowanie
+   partii (przedłużenia wykorzystane w tej partii) i resetuje licznik
+   przedłużeń oraz zegar uderzenia na kolejną partię; nie zeruje łącznego
+   czasu meczu.
+6b. **Wynik meczu** — widoczny na bieżąco w nagłówku ekranu meczu
+   ("Gracz 1 X : Y Gracz 2").
+7. **Zakończenie meczu** — pokazuje podsumowanie: wynik końcowy, zwycięzcę
+   (lub remis), liczbę rozegranych partii, łączną liczbę przedłużeń i
+   przekroczeń czasu (fauli) na gracza oraz listę wyników poszczególnych
+   partii, zanim wróci do ekranu ustawień.
 8. **Łączny czas meczu (opcjonalny)** — dodatkowy, malejący licznik całego
    meczu, niezależny od zegara na pojedyncze uderzenie. Włączany/wyłączany
    w ustawieniach, ponieważ profesjonalne rozgrywki pool zwykle **nie** mają
@@ -36,12 +46,23 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    - czas przedłużenia (s),
    - liczba przedłużeń na partię,
    - włącznik + długość łącznego czasu meczu (min),
-   - nazwy obu zawodników.
+   - nazwy obu zawodników — pole zaznacza cały tekst po dotknięciu (łatwa
+     podmiana) i podpowiada ostatnio używane imiona z poprzednich meczów.
 10. Utrzymanie ekranu włączonego podczas trwania meczu (`expo-keep-awake`),
     żeby telefon/tablet nie usypiał w trakcie odmierzania.
+11. **Układ responsywny** — treść ekranów jest wyśrodkowana i ograniczona do
+    szerokości telefonu (maks. 480 px), żeby na tablecie nie rozciągała się
+    na całą szerokość; rozmiar zegara skaluje się do dostępnej szerokości.
+12. **Kolory** — jasny/ciemny motyw (patrz sekcja 6), gracz 1 oznaczony
+    czerwienią, gracz 2 błękitem (obramowanie aktywnego panelu, kolor imienia,
+    wyniku i cyfr zegara uderzenia w trakcie normalnego odliczania); zielony
+    oznacza stan aktywny/dostępny (przedłużenie, stepper, przełącznik czasu
+    meczu), szary — nieaktywny/wyczerpany, a żółty/czerwony — ostrzeżenie
+    10 s / faul czasowy niezależnie od gracza.
 
 Poza zakresem MVP (świadomie pominięte, można dodać później):
-wielu sędziów/urządzeń w sieci, historia meczów/statystyki, więcej niż
+wielu sędziów/urządzeń w sieci, historia wielu meczów (obecnie tylko bieżący
+mecz), więcej niż
 2 zawodników, dodatkowy czas na pierwsze uderzenie po breaku.
 
 ## 2. Wartości domyślne — źródła
