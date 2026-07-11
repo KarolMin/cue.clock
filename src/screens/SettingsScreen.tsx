@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,6 +11,8 @@ import {
   View,
 } from 'react-native';
 import { NumberStepper } from '../components/NumberStepper';
+import { ThemeColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { LIMITS, Settings } from '../types/settings';
 
 interface Props {
@@ -20,6 +22,8 @@ interface Props {
 }
 
 export function SettingsScreen({ settings, onChange, onStart }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [player1Name, setPlayer1Name] = useState(settings.player1Name);
   const [player2Name, setPlayer2Name] = useState(settings.player2Name);
 
@@ -50,7 +54,7 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             onEndEditing={commitNames}
             onBlur={commitNames}
             placeholder="Gracz 1"
-            placeholderTextColor="#5a6070"
+            placeholderTextColor={colors.placeholder}
           />
           <TextInput
             style={styles.input}
@@ -59,7 +63,7 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             onEndEditing={commitNames}
             onBlur={commitNames}
             placeholder="Gracz 2"
-            placeholderTextColor="#5a6070"
+            placeholderTextColor={colors.placeholder}
           />
         </View>
 
@@ -98,8 +102,8 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             <Switch
               value={settings.totalMatchEnabled}
               onValueChange={(v) => update({ totalMatchEnabled: v })}
-              trackColor={{ false: '#2a2f3a', true: '#4fd1c5' }}
-              thumbColor="#fff"
+              trackColor={{ false: colors.disabledSurface, true: colors.accent }}
+              thumbColor="#ffffff"
             />
           </View>
           {settings.totalMatchEnabled && (
@@ -123,63 +127,65 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  content: {
-    padding: 20,
-    paddingTop: 60,
-    paddingBottom: 40,
-    backgroundColor: '#0f1216',
-    flexGrow: 1,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  subtitle: {
-    color: '#9aa0aa',
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 28,
-  },
-  section: {
-    backgroundColor: '#171b21',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  input: {
-    backgroundColor: '#0f1216',
-    color: '#fff',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginTop: 10,
-    fontSize: 15,
-  },
-  startButton: {
-    backgroundColor: '#4fd1c5',
-    borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  startButtonText: {
-    color: '#0b1f1e',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    flex: { flex: 1 },
+    content: {
+      padding: 20,
+      paddingTop: 60,
+      paddingBottom: 40,
+      backgroundColor: colors.background,
+      flexGrow: 1,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 32,
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      textAlign: 'center',
+      marginBottom: 28,
+    },
+    section: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 16,
+    },
+    sectionTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+      marginBottom: 4,
+    },
+    switchRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    input: {
+      backgroundColor: colors.inputBackground,
+      color: colors.text,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      marginTop: 10,
+      fontSize: 15,
+    },
+    startButton: {
+      backgroundColor: colors.accent,
+      borderRadius: 16,
+      paddingVertical: 18,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    startButtonText: {
+      color: colors.accentText,
+      fontSize: 18,
+      fontWeight: '700',
+    },
+  });
+}

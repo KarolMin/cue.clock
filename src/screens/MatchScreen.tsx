@@ -1,8 +1,11 @@
 import { useKeepAwake } from 'expo-keep-awake';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { useMatchTimer } from '../hooks/useMatchTimer';
 import { useShotClockSounds } from '../sound/useShotClockSounds';
+import { ThemeColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { Settings } from '../types/settings';
 import { formatMinutesSeconds, formatShotSeconds } from '../utils/format';
 
@@ -15,6 +18,8 @@ const WARNING_THRESHOLD_MS = 10_000;
 
 export function MatchScreen({ settings, onEndMatch }: Props) {
   useKeepAwake();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { playWarning, playBuzzer } = useShotClockSounds();
   const { state, toggleRunning, switchPlayer, useExtension, newGame } = useMatchTimer(settings, {
     onWarning: playWarning,
@@ -22,7 +27,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   });
 
   const isLow = state.shotRemainingMs <= WARNING_THRESHOLD_MS;
-  const clockColor = state.isExpired ? '#ff4d4f' : isLow ? '#f5a623' : '#4fd1c5';
+  const clockColor = state.isExpired ? colors.danger : isLow ? colors.warning : colors.accent;
 
   return (
     <View style={styles.container}>
@@ -96,92 +101,94 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f1216',
-    padding: 20,
-    paddingTop: 60,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  gameLabel: {
-    color: '#9aa0aa',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  endLink: {
-    color: '#f5a623',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  totalRow: {
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  totalTime: {
-    color: '#9aa0aa',
-    fontSize: 14,
-  },
-  totalTimeExpired: {
-    color: '#ff4d4f',
-    fontWeight: '700',
-  },
-  clockWrap: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  clock: {
-    fontSize: 140,
-    fontWeight: '800',
-    fontVariant: ['tabular-nums'],
-  },
-  expiredLabel: {
-    color: '#ff4d4f',
-    fontSize: 20,
-    fontWeight: '700',
-    marginTop: -10,
-  },
-  playersRow: {
-    flexDirection: 'row',
-    marginBottom: 20,
-  },
-  playersGap: {
-    width: 12,
-  },
-  primaryButton: {
-    backgroundColor: '#4fd1c5',
-    borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: 'center',
-  },
-  primaryButtonDisabled: {
-    backgroundColor: '#2a2f3a',
-  },
-  primaryButtonText: {
-    color: '#0b1f1e',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  secondaryRow: {
-    flexDirection: 'row',
-    marginTop: 12,
-  },
-  secondaryButton: {
-    flex: 1,
-    backgroundColor: '#171b21',
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginHorizontal: 4,
-  },
-  secondaryButtonText: {
-    color: '#e6e6e6',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: 20,
+      paddingTop: 60,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    gameLabel: {
+      color: colors.textSecondary,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    endLink: {
+      color: colors.warning,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    totalRow: {
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    totalTime: {
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+    totalTimeExpired: {
+      color: colors.danger,
+      fontWeight: '700',
+    },
+    clockWrap: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    clock: {
+      fontSize: 140,
+      fontWeight: '800',
+      fontVariant: ['tabular-nums'],
+    },
+    expiredLabel: {
+      color: colors.danger,
+      fontSize: 20,
+      fontWeight: '700',
+      marginTop: -10,
+    },
+    playersRow: {
+      flexDirection: 'row',
+      marginBottom: 20,
+    },
+    playersGap: {
+      width: 12,
+    },
+    primaryButton: {
+      backgroundColor: colors.accent,
+      borderRadius: 16,
+      paddingVertical: 18,
+      alignItems: 'center',
+    },
+    primaryButtonDisabled: {
+      backgroundColor: colors.disabledSurface,
+    },
+    primaryButtonText: {
+      color: colors.accentText,
+      fontSize: 20,
+      fontWeight: '700',
+    },
+    secondaryRow: {
+      flexDirection: 'row',
+      marginTop: 12,
+    },
+    secondaryButton: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      paddingVertical: 14,
+      alignItems: 'center',
+      marginHorizontal: 4,
+    },
+    secondaryButtonText: {
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+  });
+}
