@@ -59,3 +59,48 @@ Developer, wystarczy raz uruchomić `eas credentials` (poprowadzi Cię przez
 logowanie do Apple i wygenerowanie certyfikatów), zmienić w `eas.json` profil
 iOS z `"simulator": true` na normalny build z dystrybucją `internal`, i
 pipeline zacznie produkować buildy instalowalne bezpośrednio na iPadzie.
+
+## Publikacja jako strona internetowa (GitHub Pages)
+
+Aplikacja działa też jako strona WWW (React Native Web), więc można ją
+wystawić pod własną domeną praktycznie za darmo — jedyny koszt to sama
+domena (kilka–kilkanaście USD/rok, zależnie od TLD). Hosting (GitHub Pages)
+jest darmowy i deployuje się automatycznie przy każdym pushu do `main` przez
+`.github/workflows/deploy-web.yml` — nie trzeba żadnych sekretów ani
+dodatkowego konta poza GitHubem.
+
+### 1. Włącz GitHub Pages (jednorazowo)
+
+Repo → **Settings → Pages → Build and deployment → Source: "GitHub Actions"**.
+Od tego momentu każdy push do `main` (albo ręczne uruchomienie z zakładki
+Actions) zbuduje `npx expo export --platform web` i opublikuje zawartość
+`dist/` pod adresem `https://<user>.github.io/<repo>/`.
+
+### 2. Kup domenę (najtaniej)
+
+Polecane rejestratory bez narzutu na cenie (sprzedają po cenie hurtowej):
+
+- [Cloudflare Registrar](https://www.cloudflare.com/products/registrar/) — `.com` ~9-10 USD/rok, zero marży.
+- [Porkbun](https://porkbun.com/) — podobne ceny, czasem tańsze promocje na pierwszy rok, ładny alt-TLD jak `.pool` czy `.app` (~10-15 USD/rok).
+
+Jeśli szukasz absolutnego minimum kosztu, tańsze bywają alternatywne TLD-y
+(np. `.xyz`, `.online`) — parę dolarów za pierwszy rok, więcej przy odnowieniu.
+
+### 3. Podepnij domenę do GitHub Pages
+
+1. W repo dodaj plik `public/CNAME` z jedną linijką — Twoją domeną
+   (np. `cueclock.pl` albo `app.cueclock.pl`). Katalog `public/` jest
+   automatycznie kopiowany do builda, więc CNAME trafi do `dist/` przy
+   każdym deployu. Daj mi znać jaką domenę kupujesz, a dodam ten plik.
+2. U rejestratora domeny ustaw rekordy DNS:
+   - **Subdomena** (np. `app.twojadomena.pl`): rekord `CNAME` → `<user>.github.io`.
+   - **Domena bez subdomeny** (`twojadomena.pl`): 4 rekordy `A` na adresy
+     GitHub Pages: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
+     `185.199.111.153` (opcjonalnie dodatkowo `AAAA` dla IPv6 — GitHub Docs
+     mają aktualną listę).
+3. W repo → Settings → Pages wpisz tę samą domenę w polu "Custom domain" i
+   zaznacz "Enforce HTTPS" (certyfikat SSL GitHub wystawi automatycznie,
+   za darmo, zwykle w ciągu kilkunastu minut).
+
+Od tego momentu strona jest w pełni zarządzana przez GitHub Actions —
+wystarczy pushować zmiany do `main`.
