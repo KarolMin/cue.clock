@@ -9,10 +9,16 @@ export interface GameLogEntry {
   extensionsUsed: Record<PlayerId, number>;
 }
 
+export interface ShotRecord {
+  player: PlayerId;
+  durationMs: number;
+}
+
 export interface MatchState {
   currentPlayer: PlayerId;
   gameNumber: number;
   shotRemainingMs: number;
+  shotElapsedMs: number;
   totalRemainingMs: number | null;
   matchElapsedMs: number;
   extensionsUsed: Record<PlayerId, number>;
@@ -20,6 +26,7 @@ export interface MatchState {
   totalFouls: Record<PlayerId, number>;
   score: Record<PlayerId, number>;
   gamesLog: GameLogEntry[];
+  shotLog: ShotRecord[];
   isRunning: boolean;
   isExpired: boolean;
   isMatchTimeExpired: boolean;
@@ -40,6 +47,7 @@ function initialState(settings: Settings): MatchState {
     currentPlayer: 1,
     gameNumber: 1,
     shotRemainingMs: settings.shotSeconds * 1000,
+    shotElapsedMs: 0,
     totalRemainingMs: settings.totalMatchEnabled ? settings.totalMatchMinutes * 60 * 1000 : null,
     matchElapsedMs: 0,
     extensionsUsed: { 1: 0, 2: 0 },
@@ -47,10 +55,18 @@ function initialState(settings: Settings): MatchState {
     totalFouls: { 1: 0, 2: 0 },
     score: { 1: 0, 2: 0 },
     gamesLog: [],
+    shotLog: [],
     isRunning: false,
     isExpired: false,
     isMatchTimeExpired: false,
   };
+}
+
+// Ends the in-progress shot for the current player and logs its duration,
+// unless it already ended via a time-out (recorded by the tick effect instead).
+function logShotIfNeeded(prev: MatchState): ShotRecord[] {
+  if (prev.isExpired || prev.shotElapsedMs <= 0) return prev.shotLog;
+  return [...prev.shotLog, { player: prev.currentPlayer, durationMs: prev.shotElapsedMs }];
 }
 
 export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
@@ -76,6 +92,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         if (!prev.isRunning) return prev;
 
         const shotRemainingMs = Math.max(0, prev.shotRemainingMs - deltaMs);
+        const shotElapsedMs = prev.shotElapsedMs + deltaMs;
         const totalRemainingMs =
           prev.totalRemainingMs === null ? null : Math.max(0, prev.totalRemainingMs - deltaMs);
 
@@ -104,6 +121,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         return {
           ...prev,
           shotRemainingMs,
+          shotElapsedMs: shotJustExpired ? 0 : shotElapsedMs,
           totalRemainingMs,
           matchElapsedMs: prev.matchElapsedMs + deltaMs,
           isExpired: prev.isExpired || shotJustExpired,
@@ -112,6 +130,9 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           totalFouls: shotJustExpired
             ? { ...prev.totalFouls, [prev.currentPlayer]: prev.totalFouls[prev.currentPlayer] + 1 }
             : prev.totalFouls,
+          shotLog: shotJustExpired
+            ? [...prev.shotLog, { player: prev.currentPlayer, durationMs: shotElapsedMs }]
+            : prev.shotLog,
         };
       });
     }, TICK_MS);
@@ -132,6 +153,8 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
     setState((prev) => ({
       ...prev,
       shotRemainingMs: settings.shotSeconds * 1000,
+      shotElapsedMs: 0,
+      shotLog: logShotIfNeeded(prev),
       isExpired: false,
     }));
   }, [settings.shotSeconds]);
@@ -143,6 +166,8 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
       ...prev,
       currentPlayer: prev.currentPlayer === 1 ? 2 : 1,
       shotRemainingMs: settings.shotSeconds * 1000,
+      shotElapsedMs: 0,
+      shotLog: logShotIfNeeded(prev),
       isExpired: false,
     }));
   }, [settings.shotSeconds]);
@@ -175,8 +200,10 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           ...prev.gamesLog,
           { gameNumber: prev.gameNumber, winner, extensionsUsed: prev.extensionsUsed },
         ],
+        shotLog: logShotIfNeeded(prev),
         gameNumber: prev.gameNumber + 1,
         shotRemainingMs: settings.shotSeconds * 1000,
+        shotElapsedMs: 0,
         extensionsUsed: { 1: 0, 2: 0 },
         isExpired: false,
         isRunning: false,

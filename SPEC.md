@@ -39,9 +39,13 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    Gdy któryś z graczy osiągnie tę liczbę, po zamknięciu podsumowania partii
    od razu pokazywane jest podsumowanie meczu.
 7. **Zakończenie meczu** — pokazuje podsumowanie: czas trwania meczu, wynik
-   końcowy, zwycięzcę (lub remis), liczbę rozegranych partii, łączną liczbę
-   przedłużeń i przekroczeń czasu (fauli) na gracza oraz listę wyników
-   poszczególnych partii, zanim wróci do ekranu ustawień.
+   końcowy, zwycięzcę (lub remis), liczbę rozegranych partii oraz tabelę
+   statystyk na gracza (liczba uderzeń, łączny czas gry, średni czas
+   uderzenia, najszybsze i najdłuższe uderzenie, przedłużenia łącznie,
+   przekroczenia czasu/fauli), a także listę wyników poszczególnych partii,
+   zanim wróci do ekranu ustawień. Każde uderzenie (zakończone nowym
+   uderzeniem, zmianą zawodnika, końcem partii lub przekroczeniem czasu)
+   jest rejestrowane z czasem jego trwania.
 8. **Łączny czas meczu (opcjonalny)** — dodatkowy, malejący licznik całego
    meczu, niezależny od zegara na pojedyncze uderzenie. Włączany/wyłączany
    w ustawieniach, ponieważ profesjonalne rozgrywki pool zwykle **nie** mają
