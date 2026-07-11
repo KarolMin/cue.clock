@@ -76,31 +76,40 @@ Od tego momentu każdy push do `main` (albo ręczne uruchomienie z zakładki
 Actions) zbuduje `npx expo export --platform web` i opublikuje zawartość
 `dist/` pod adresem `https://<user>.github.io/<repo>/`.
 
-### 2. Kup domenę (najtaniej)
+### 2. Domena
 
-Polecane rejestratory bez narzutu na cenie (sprzedają po cenie hurtowej):
+Kupiona: **cueclock.online**. Plik `public/CNAME` z tą domeną jest już w
+repo (kopiowany automatycznie do `dist/` przy każdym deployu).
 
-- [Cloudflare Registrar](https://www.cloudflare.com/products/registrar/) — `.com` ~9-10 USD/rok, zero marży.
-- [Porkbun](https://porkbun.com/) — podobne ceny, czasem tańsze promocje na pierwszy rok, ładny alt-TLD jak `.pool` czy `.app` (~10-15 USD/rok).
+### 3. Ustaw DNS u rejestratora domeny
 
-Jeśli szukasz absolutnego minimum kosztu, tańsze bywają alternatywne TLD-y
-(np. `.xyz`, `.online`) — parę dolarów za pierwszy rok, więcej przy odnowieniu.
+`cueclock.online` to domena bez subdomeny (apex), więc potrzebne są **4
+rekordy A** wskazujące na adresy IP GitHub Pages:
 
-### 3. Podepnij domenę do GitHub Pages
+| Typ | Nazwa/Host | Wartość |
+|-----|-----------|---------|
+| A | @ (albo puste/`cueclock.online`) | `185.199.108.153` |
+| A | @ | `185.199.109.153` |
+| A | @ | `185.199.110.153` |
+| A | @ | `185.199.111.153` |
 
-1. W repo dodaj plik `public/CNAME` z jedną linijką — Twoją domeną
-   (np. `cueclock.pl` albo `app.cueclock.pl`). Katalog `public/` jest
-   automatycznie kopiowany do builda, więc CNAME trafi do `dist/` przy
-   każdym deployu. Daj mi znać jaką domenę kupujesz, a dodam ten plik.
-2. U rejestratora domeny ustaw rekordy DNS:
-   - **Subdomena** (np. `app.twojadomena.pl`): rekord `CNAME` → `<user>.github.io`.
-   - **Domena bez subdomeny** (`twojadomena.pl`): 4 rekordy `A` na adresy
-     GitHub Pages: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
-     `185.199.111.153` (opcjonalnie dodatkowo `AAAA` dla IPv6 — GitHub Docs
-     mają aktualną listę).
-3. W repo → Settings → Pages wpisz tę samą domenę w polu "Custom domain" i
-   zaznacz "Enforce HTTPS" (certyfikat SSL GitHub wystawi automatycznie,
-   za darmo, zwykle w ciągu kilkunastu minut).
+Opcjonalnie dodaj też IPv6 (`AAAA`, po jednym rekordzie na każdy z poniższych):
+`2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`.
+
+Jeśli chcesz też, żeby działało `www.cueclock.online`, dodaj dodatkowo:
+
+| Typ | Nazwa/Host | Wartość |
+|-----|-----------|---------|
+| CNAME | www | `karolmin.github.io` |
+
+Zmiany DNS potrafią propagować się od kilku minut do kilku godzin.
+
+### 4. Włącz custom domain w GitHub Pages
+
+Repo → **Settings → Pages** → w polu "Custom domain" wpisz `cueclock.online`
+i zapisz. Gdy DNS się rozpropaguje, zaznacz **"Enforce HTTPS"** — GitHub
+sam wystawi darmowy certyfikat SSL (zwykle w ciągu kilkunastu minut).
 
 Od tego momentu strona jest w pełni zarządzana przez GitHub Actions —
-wystarczy pushować zmiany do `main`.
+wystarczy pushować zmiany do `main`, a `https://cueclock.online` zaktualizuje
+się automatycznie.
