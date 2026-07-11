@@ -12,7 +12,9 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    dźwiękowy + wibracja (faul czasowy), a UI podświetla się na czerwono.
 3. **Ostrzeżenie 10 s** — krótki sygnał dźwiękowy/wibracja i zmiana koloru
    zegara, gdy zostanie 10 sekund (analogicznie do zawołania sędziego "time"
-   w rozgrywkach zawodowych).
+   w rozgrywkach zawodowych). Dodatkowo od 5. sekundy zegar "tyka" — krótki
+   sygnał raz na sekundę (5, 4, 3, 2, 1) — aż do zera, gdzie odzywa się
+   dłuższy sygnał (buzzer).
 4. **Przedłużenie ("extension")** — każdy zawodnik może je wykorzystać
    **raz na partię** (rack/grę), a nie raz na cały mecz. Naciśnięcie przycisku
    dodaje skonfigurowany czas przedłużenia do aktualnie trwającego zegara
@@ -32,10 +34,14 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    czasu meczu.
 6b. **Wynik meczu** — widoczny na bieżąco w nagłówku ekranu meczu
    ("Gracz 1 X : Y Gracz 2").
-7. **Zakończenie meczu** — pokazuje podsumowanie: wynik końcowy, zwycięzcę
-   (lub remis), liczbę rozegranych partii, łączną liczbę przedłużeń i
-   przekroczeń czasu (fauli) na gracza oraz listę wyników poszczególnych
-   partii, zanim wróci do ekranu ustawień.
+6c. **Format meczu ("race to X")** — opcjonalne ustawienie liczby wygranych
+   partii potrzebnych do wygrania meczu (0 = brak limitu, zakończenie ręczne).
+   Gdy któryś z graczy osiągnie tę liczbę, po zamknięciu podsumowania partii
+   od razu pokazywane jest podsumowanie meczu.
+7. **Zakończenie meczu** — pokazuje podsumowanie: czas trwania meczu, wynik
+   końcowy, zwycięzcę (lub remis), liczbę rozegranych partii, łączną liczbę
+   przedłużeń i przekroczeń czasu (fauli) na gracza oraz listę wyników
+   poszczególnych partii, zanim wróci do ekranu ustawień.
 8. **Łączny czas meczu (opcjonalny)** — dodatkowy, malejący licznik całego
    meczu, niezależny od zegara na pojedyncze uderzenie. Włączany/wyłączany
    w ustawieniach, ponieważ profesjonalne rozgrywki pool zwykle **nie** mają

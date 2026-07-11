@@ -4,6 +4,7 @@ export interface Settings {
   extensionsPerGame: number;
   totalMatchEnabled: boolean;
   totalMatchMinutes: number;
+  raceToGames: number;
   player1Name: string;
   player2Name: string;
 }
@@ -16,6 +17,7 @@ export const DEFAULT_SETTINGS: Settings = {
   extensionsPerGame: 1,
   totalMatchEnabled: false,
   totalMatchMinutes: 60,
+  raceToGames: 0,
   player1Name: 'Gracz 1',
   player2Name: 'Gracz 2',
 };
@@ -25,4 +27,5 @@ export const LIMITS = {
   extensionSeconds: { min: 0, max: 120 },
   extensionsPerGame: { min: 0, max: 5 },
   totalMatchMinutes: { min: 1, max: 999 },
+  raceToGames: { min: 0, max: 21 },
 } as const;

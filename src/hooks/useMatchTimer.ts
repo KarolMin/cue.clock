@@ -14,6 +14,7 @@ export interface MatchState {
   gameNumber: number;
   shotRemainingMs: number;
   totalRemainingMs: number | null;
+  matchElapsedMs: number;
   extensionsUsed: Record<PlayerId, number>;
   totalExtensionsUsed: Record<PlayerId, number>;
   totalFouls: Record<PlayerId, number>;
@@ -26,11 +27,13 @@ export interface MatchState {
 
 interface Callbacks {
   onWarning?: () => void;
+  onTick?: () => void;
   onBuzzer?: () => void;
 }
 
 const TICK_MS = 100;
 const WARNING_THRESHOLD_MS = 10_000;
+const FINAL_COUNTDOWN_SECONDS = 5;
 
 function initialState(settings: Settings): MatchState {
   return {
@@ -38,6 +41,7 @@ function initialState(settings: Settings): MatchState {
     gameNumber: 1,
     shotRemainingMs: settings.shotSeconds * 1000,
     totalRemainingMs: settings.totalMatchEnabled ? settings.totalMatchMinutes * 60 * 1000 : null,
+    matchElapsedMs: 0,
     extensionsUsed: { 1: 0, 2: 0 },
     totalExtensionsUsed: { 1: 0, 2: 0 },
     totalFouls: { 1: 0, 2: 0 },
@@ -53,6 +57,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
   const [state, setState] = useState<MatchState>(() => initialState(settings));
   const lastTsRef = useRef<number | null>(null);
   const warningFiredRef = useRef(false);
+  const lastTickSecondRef = useRef<number | null>(null);
   const callbacksRef = useRef(callbacks);
   callbacksRef.current = callbacks;
 
@@ -79,6 +84,16 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           callbacksRef.current.onWarning?.();
         }
 
+        const secondsLeft = Math.ceil(shotRemainingMs / 1000);
+        if (
+          secondsLeft <= FINAL_COUNTDOWN_SECONDS &&
+          secondsLeft >= 1 &&
+          secondsLeft !== lastTickSecondRef.current
+        ) {
+          lastTickSecondRef.current = secondsLeft;
+          callbacksRef.current.onTick?.();
+        }
+
         const shotJustExpired = shotRemainingMs === 0 && !prev.isExpired;
         const matchJustExpired =
           totalRemainingMs === 0 && prev.totalRemainingMs !== null && prev.totalRemainingMs > 0;
@@ -90,6 +105,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           ...prev,
           shotRemainingMs,
           totalRemainingMs,
+          matchElapsedMs: prev.matchElapsedMs + deltaMs,
           isExpired: prev.isExpired || shotJustExpired,
           isMatchTimeExpired: prev.isMatchTimeExpired || matchJustExpired,
           isRunning: shotJustExpired || matchJustExpired ? false : prev.isRunning,
@@ -112,6 +128,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
 
   const newShot = useCallback(() => {
     warningFiredRef.current = false;
+    lastTickSecondRef.current = null;
     setState((prev) => ({
       ...prev,
       shotRemainingMs: settings.shotSeconds * 1000,
@@ -121,6 +138,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
 
   const switchPlayer = useCallback(() => {
     warningFiredRef.current = false;
+    lastTickSecondRef.current = null;
     setState((prev) => ({
       ...prev,
       currentPlayer: prev.currentPlayer === 1 ? 2 : 1,
@@ -149,6 +167,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
   const endGame = useCallback(
     (winner: PlayerId) => {
       warningFiredRef.current = false;
+      lastTickSecondRef.current = null;
       setState((prev) => ({
         ...prev,
         score: { ...prev.score, [winner]: prev.score[winner] + 1 },

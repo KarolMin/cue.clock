@@ -21,6 +21,7 @@ interface GameSummary {
   winner: PlayerId;
   extensionsUsed: Record<PlayerId, number>;
   scoreAfter: Record<PlayerId, number>;
+  matchWon: boolean;
 }
 
 const WARNING_THRESHOLD_MS = 10_000;
@@ -30,10 +31,10 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { playWarning, playBuzzer } = useShotClockSounds();
+  const { playWarning, playBuzzer, playTick } = useShotClockSounds();
   const { state, toggleRunning, newShot, switchPlayer, useExtension, endGame } = useMatchTimer(
     settings,
-    { onWarning: playWarning, onBuzzer: playBuzzer }
+    { onWarning: playWarning, onTick: playTick, onBuzzer: playBuzzer }
   );
 
   const [pickingWinner, setPickingWinner] = useState(false);
@@ -47,11 +48,13 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   const clockFontSize = Math.max(100, Math.min(200, contentWidth * 0.38));
 
   const handlePickWinner = (winner: PlayerId) => {
+    const newScore = state.score[winner] + 1;
     setGameSummary({
       gameNumber: state.gameNumber,
       winner,
       extensionsUsed: { ...state.extensionsUsed },
-      scoreAfter: { ...state.score, [winner]: state.score[winner] + 1 },
+      scoreAfter: { ...state.score, [winner]: newScore },
+      matchWon: settings.raceToGames > 0 && newScore >= settings.raceToGames,
     });
     endGame(winner);
     setPickingWinner(false);
@@ -76,6 +79,9 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           <Text style={{ color: colors.player1 }}>{state.score[1]}</Text> :{' '}
           <Text style={{ color: colors.player2 }}>{state.score[2]}</Text> {settings.player2Name}
         </Text>
+        {settings.raceToGames > 0 && (
+          <Text style={styles.raceHint}>Grane do {settings.raceToGames} wygranych</Text>
+        )}
 
         {state.totalRemainingMs !== null && (
           <View style={styles.totalRow}>
@@ -168,7 +174,9 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
         {gameSummary && (
           <>
             <Text style={styles.modalTitle}>
-              {nameFor(gameSummary.winner)} wygrywa partię {gameSummary.gameNumber}!
+              {gameSummary.matchWon
+                ? `${nameFor(gameSummary.winner)} wygrywa mecz!`
+                : `${nameFor(gameSummary.winner)} wygrywa partię ${gameSummary.gameNumber}!`}
             </Text>
             <Text style={styles.modalScore}>
               {settings.player1Name} {gameSummary.scoreAfter[1]} : {gameSummary.scoreAfter[2]}{' '}
@@ -180,8 +188,16 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
                 {settings.player2Name} {gameSummary.extensionsUsed[2]}
               </Text>
             </View>
-            <Pressable style={styles.winnerButton} onPress={() => setGameSummary(null)}>
-              <Text style={styles.winnerButtonText}>Kontynuuj</Text>
+            <Pressable
+              style={styles.winnerButton}
+              onPress={() => {
+                setGameSummary(null);
+                if (gameSummary.matchWon) setShowMatchSummary(true);
+              }}
+            >
+              <Text style={styles.winnerButtonText}>
+                {gameSummary.matchWon ? 'Zobacz podsumowanie meczu' : 'Kontynuuj'}
+              </Text>
             </Pressable>
           </>
         )}
@@ -196,6 +212,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           {matchWinner ? `Wygrywa ${nameFor(matchWinner)}` : 'Remis'}
         </Text>
         <View style={styles.statsBlock}>
+          <Text style={styles.statsRow}>Czas trwania meczu: {formatMinutesSeconds(state.matchElapsedMs)}</Text>
           <Text style={styles.statsRow}>Rozegrane partie: {state.gamesLog.length}</Text>
           <Text style={styles.statsRow}>
             Przedłużenia łącznie: {settings.player1Name} {state.totalExtensionsUsed[1]} ·{' '}
@@ -261,6 +278,12 @@ function createStyles(colors: ThemeColors) {
       fontWeight: '700',
       textAlign: 'center',
       marginTop: 12,
+    },
+    raceHint: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      textAlign: 'center',
+      marginTop: 2,
     },
     totalRow: {
       alignItems: 'center',
