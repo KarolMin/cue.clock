@@ -4,9 +4,11 @@ import { StyleSheet, View } from 'react-native';
 import { MatchScreen } from './src/screens/MatchScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { loadSettings, saveSettings } from './src/storage/settingsStorage';
+import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { DEFAULT_SETTINGS, Settings } from './src/types/settings';
 
-export default function App() {
+function AppInner() {
+  const { colors, scheme } = useTheme();
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [screen, setScreen] = useState<'settings' | 'match'>('settings');
   const [loaded, setLoaded] = useState(false);
@@ -24,11 +26,11 @@ export default function App() {
   };
 
   if (!loaded) {
-    return <View style={styles.container} />;
+    return <View style={{ flex: 1, backgroundColor: colors.background }} />;
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {screen === 'settings' ? (
         <SettingsScreen
           settings={settings}
@@ -38,14 +40,21 @@ export default function App() {
       ) : (
         <MatchScreen settings={settings} onEndMatch={() => setScreen('settings')} />
       )}
-      <StatusBar style="light" />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
     </View>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f1216',
   },
 });

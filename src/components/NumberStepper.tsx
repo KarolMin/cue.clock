@@ -1,4 +1,7 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ThemeColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
   label: string;
@@ -11,6 +14,8 @@ interface Props {
 }
 
 export function NumberStepper({ label, value, onChange, min, max, step = 1, unit }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const clamp = (v: number) => Math.min(max, Math.max(min, v));
 
   return (
@@ -40,44 +45,46 @@ export function NumberStepper({ label, value, onChange, min, max, step = 1, unit
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  label: {
-    fontSize: 16,
-    color: '#e6e6e6',
-    flexShrink: 1,
-    marginRight: 12,
-  },
-  controls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  button: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#2a2f3a',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    color: '#4fd1c5',
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  buttonTextDisabled: {
-    color: '#4a4f58',
-  },
-  value: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    minWidth: 64,
-    textAlign: 'center',
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+    },
+    label: {
+      fontSize: 16,
+      color: colors.text,
+      flexShrink: 1,
+      marginRight: 12,
+    },
+    controls: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    button: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.disabledSurface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    buttonText: {
+      color: colors.accent,
+      fontSize: 20,
+      fontWeight: '600',
+    },
+    buttonTextDisabled: {
+      color: colors.disabledText,
+    },
+    value: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+      minWidth: 64,
+      textAlign: 'center',
+    },
+  });
+}

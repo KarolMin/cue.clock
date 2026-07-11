@@ -1,4 +1,7 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ThemeColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
   name: string;
@@ -17,6 +20,8 @@ export function PlayerPanel({
   canUseExtension,
   onUseExtension,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const extensionsLeft = extensionsPerGame - extensionsUsed;
 
   return (
@@ -47,60 +52,62 @@ export function PlayerPanel({
   );
 }
 
-const styles = StyleSheet.create({
-  panel: {
-    flex: 1,
-    backgroundColor: '#1b1f27',
-    borderRadius: 16,
-    padding: 14,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  panelActive: {
-    borderColor: '#4fd1c5',
-    backgroundColor: '#1f2a2b',
-  },
-  name: {
-    color: '#9aa0aa',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  nameActive: {
-    color: '#fff',
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: 3,
-  },
-  dotAvailable: {
-    backgroundColor: '#4fd1c5',
-  },
-  dotUsed: {
-    backgroundColor: '#3a3f48',
-  },
-  extButton: {
-    backgroundColor: '#4fd1c5',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-  },
-  extButtonDisabled: {
-    backgroundColor: '#2a2f3a',
-  },
-  extButtonText: {
-    color: '#0b1f1e',
-    fontWeight: '700',
-    fontSize: 13,
-  },
-  extButtonTextDisabled: {
-    color: '#565c66',
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    panel: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: 14,
+      alignItems: 'center',
+      borderWidth: 2,
+      borderColor: 'transparent',
+    },
+    panelActive: {
+      borderColor: colors.accent,
+      backgroundColor: colors.surfaceActive,
+    },
+    name: {
+      color: colors.textSecondary,
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 8,
+    },
+    nameActive: {
+      color: colors.text,
+    },
+    dotsRow: {
+      flexDirection: 'row',
+      marginBottom: 10,
+    },
+    dot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      marginHorizontal: 3,
+    },
+    dotAvailable: {
+      backgroundColor: colors.accent,
+    },
+    dotUsed: {
+      backgroundColor: colors.disabledSurface,
+    },
+    extButton: {
+      backgroundColor: colors.accent,
+      paddingVertical: 8,
+      paddingHorizontal: 14,
+      borderRadius: 10,
+    },
+    extButtonDisabled: {
+      backgroundColor: colors.disabledSurface,
+    },
+    extButtonText: {
+      color: colors.accentText,
+      fontWeight: '700',
+      fontSize: 13,
+    },
+    extButtonTextDisabled: {
+      color: colors.disabledText,
+    },
+  });
+}
