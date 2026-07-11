@@ -3,13 +3,14 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { AppModal } from '../components/AppModal';
 import { PlayerPanel } from '../components/PlayerPanel';
-import { PlayerId, useMatchTimer } from '../hooks/useMatchTimer';
+import { StatsTable } from '../components/StatsTable';
+import { PlayerId, ShotRecord, useMatchTimer } from '../hooks/useMatchTimer';
 import { useShotClockSounds } from '../sound/useShotClockSounds';
 import { ThemeColors } from '../theme/colors';
 import { MAX_CONTENT_WIDTH } from '../theme/layout';
 import { useTheme } from '../theme/ThemeContext';
 import { Settings } from '../types/settings';
-import { formatMinutesSeconds, formatShotSeconds } from '../utils/format';
+import { formatMinutesSeconds, formatSecondsDecimal, formatShotSeconds } from '../utils/format';
 
 interface Props {
   settings: Settings;
@@ -64,13 +65,55 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   const matchWinner: PlayerId | null =
     state.score[1] === state.score[2] ? null : state.score[1] > state.score[2] ? 1 : 2;
 
+  const shotStats = useMemo(() => computeShotStats(state.shotLog), [state.shotLog]);
+  const summaryRows = useMemo(
+    () => [
+      {
+        label: 'Liczba uderzeń',
+        p1: String(shotStats[1].count),
+        p2: String(shotStats[2].count),
+      },
+      {
+        label: 'Łączny czas gry',
+        p1: formatMinutesSeconds(shotStats[1].totalMs),
+        p2: formatMinutesSeconds(shotStats[2].totalMs),
+      },
+      {
+        label: 'Średni czas uderzenia',
+        p1: shotStats[1].count > 0 ? formatSecondsDecimal(shotStats[1].totalMs / shotStats[1].count) : '—',
+        p2: shotStats[2].count > 0 ? formatSecondsDecimal(shotStats[2].totalMs / shotStats[2].count) : '—',
+      },
+      {
+        label: 'Najszybsze uderzenie',
+        p1: shotStats[1].fastestMs !== null ? formatSecondsDecimal(shotStats[1].fastestMs) : '—',
+        p2: shotStats[2].fastestMs !== null ? formatSecondsDecimal(shotStats[2].fastestMs) : '—',
+      },
+      {
+        label: 'Najdłuższe uderzenie',
+        p1: shotStats[1].longestMs !== null ? formatSecondsDecimal(shotStats[1].longestMs) : '—',
+        p2: shotStats[2].longestMs !== null ? formatSecondsDecimal(shotStats[2].longestMs) : '—',
+      },
+      {
+        label: 'Przedłużenia łącznie',
+        p1: String(state.totalExtensionsUsed[1]),
+        p2: String(state.totalExtensionsUsed[2]),
+      },
+      {
+        label: 'Przekroczenia czasu',
+        p1: String(state.totalFouls[1]),
+        p2: String(state.totalFouls[2]),
+      },
+    ],
+    [shotStats, state.totalExtensionsUsed, state.totalFouls]
+  );
+
   return (
     <View style={styles.outer}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.gameLabel}>Partia {state.gameNumber}</Text>
-          <Pressable onPress={() => setShowMatchSummary(true)} hitSlop={10}>
-            <Text style={styles.endLink}>Zakończ mecz</Text>
+          <Pressable style={styles.endButton} onPress={() => setShowMatchSummary(true)}>
+            <Text style={styles.endButtonText}>Zakończ mecz</Text>
           </Pressable>
         </View>
 
@@ -142,8 +185,10 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
         </View>
 
         <View style={styles.secondaryRow}>
-          <Pressable style={styles.secondaryButton} onPress={switchPlayer}>
-            <Text style={styles.secondaryButtonText}>Zmiana zawodnika</Text>
+          <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={switchPlayer}>
+            <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
+              Zmiana zawodnika
+            </Text>
           </Pressable>
           <Pressable style={styles.secondaryButton} onPress={() => setPickingWinner(true)}>
             <Text style={styles.secondaryButtonText}>Zakończ partię</Text>
@@ -214,14 +259,13 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
         <View style={styles.statsBlock}>
           <Text style={styles.statsRow}>Czas trwania meczu: {formatMinutesSeconds(state.matchElapsedMs)}</Text>
           <Text style={styles.statsRow}>Rozegrane partie: {state.gamesLog.length}</Text>
-          <Text style={styles.statsRow}>
-            Przedłużenia łącznie: {settings.player1Name} {state.totalExtensionsUsed[1]} ·{' '}
-            {settings.player2Name} {state.totalExtensionsUsed[2]}
-          </Text>
-          <Text style={styles.statsRow}>
-            Przekroczenia czasu: {settings.player1Name} {state.totalFouls[1]} · {settings.player2Name}{' '}
-            {state.totalFouls[2]}
-          </Text>
+          <StatsTable
+            player1Name={settings.player1Name}
+            player2Name={settings.player2Name}
+            player1Color={colors.player1}
+            player2Color={colors.player2}
+            rows={summaryRows}
+          />
           {state.gamesLog.length > 0 && (
             <View style={styles.gamesLogWrap}>
               {state.gamesLog.map((g) => (
@@ -241,6 +285,28 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
       </AppModal>
     </View>
   );
+}
+
+interface PlayerShotStats {
+  count: number;
+  totalMs: number;
+  fastestMs: number | null;
+  longestMs: number | null;
+}
+
+function computeShotStats(shotLog: ShotRecord[]): Record<PlayerId, PlayerShotStats> {
+  const stats: Record<PlayerId, PlayerShotStats> = {
+    1: { count: 0, totalMs: 0, fastestMs: null, longestMs: null },
+    2: { count: 0, totalMs: 0, fastestMs: null, longestMs: null },
+  };
+  for (const shot of shotLog) {
+    const s = stats[shot.player];
+    s.count += 1;
+    s.totalMs += shot.durationMs;
+    s.fastestMs = s.fastestMs === null ? shot.durationMs : Math.min(s.fastestMs, shot.durationMs);
+    s.longestMs = s.longestMs === null ? shot.durationMs : Math.max(s.longestMs, shot.durationMs);
+  }
+  return stats;
 }
 
 function createStyles(colors: ThemeColors) {
@@ -267,10 +333,16 @@ function createStyles(colors: ThemeColors) {
       fontSize: 15,
       fontWeight: '600',
     },
-    endLink: {
-      color: colors.warning,
-      fontSize: 14,
-      fontWeight: '600',
+    endButton: {
+      backgroundColor: colors.warning,
+      paddingVertical: 6,
+      paddingHorizontal: 14,
+      borderRadius: 999,
+    },
+    endButtonText: {
+      color: '#241300',
+      fontSize: 13,
+      fontWeight: '700',
     },
     scoreRow: {
       color: colors.text,
@@ -366,11 +438,20 @@ function createStyles(colors: ThemeColors) {
       paddingVertical: 14,
       alignItems: 'center',
       marginHorizontal: 4,
+      borderWidth: 2,
+      borderColor: 'transparent',
+    },
+    secondaryButtonHighlighted: {
+      borderColor: colors.accent,
     },
     secondaryButtonText: {
       color: colors.text,
       fontSize: 14,
       fontWeight: '600',
+    },
+    secondaryButtonTextHighlighted: {
+      color: colors.accent,
+      fontWeight: '700',
     },
     modalTitle: {
       color: colors.text,
