@@ -118,6 +118,22 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
           </View>
 
           <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Format meczu</Text>
+            <NumberStepper
+              label="Mecz do X wygranych partii"
+              value={settings.raceToGames}
+              onChange={(v) => update({ raceToGames: v })}
+              min={LIMITS.raceToGames.min}
+              max={LIMITS.raceToGames.max}
+            />
+            <Text style={styles.helperText}>
+              {settings.raceToGames === 0
+                ? 'Bez limitu — mecz kończysz ręcznie w dowolnym momencie.'
+                : `Po ${settings.raceToGames} wygranych partiach zobaczysz podsumowanie meczu.`}
+            </Text>
+          </View>
+
+          <View style={styles.section}>
             <View style={styles.switchRow}>
               <Text style={styles.sectionTitle}>Łączny czas meczu</Text>
               <Switch
@@ -192,6 +208,11 @@ function createStyles(colors: ThemeColors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+    },
+    helperText: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      marginTop: 4,
     },
     startButton: {
       backgroundColor: colors.accent,
