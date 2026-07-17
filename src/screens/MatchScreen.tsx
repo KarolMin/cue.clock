@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useKeepAwake } from 'expo-keep-awake';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -41,6 +42,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   const [pickingWinner, setPickingWinner] = useState(false);
   const [gameSummary, setGameSummary] = useState<GameSummary | null>(null);
   const [showMatchSummary, setShowMatchSummary] = useState(false);
+  const [confirmingEndMatch, setConfirmingEndMatch] = useState(false);
 
   const isLow = state.shotRemainingMs <= WARNING_THRESHOLD_MS;
   const currentPlayerColor = state.currentPlayer === 1 ? colors.player1 : colors.player2;
@@ -59,6 +61,19 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
     });
     endGame(winner);
     setPickingWinner(false);
+  };
+
+  const handleRequestEndMatch = () => {
+    setShowMatchSummary(false);
+    setConfirmingEndMatch(true);
+  };
+  const handleCancelEndMatch = () => {
+    setConfirmingEndMatch(false);
+    setShowMatchSummary(true);
+  };
+  const handleConfirmEndMatch = () => {
+    setConfirmingEndMatch(false);
+    onEndMatch();
   };
 
   const nameFor = (player: PlayerId) => (player === 1 ? settings.player1Name : settings.player2Name);
@@ -113,6 +128,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
         <View style={styles.header}>
           <Text style={styles.gameLabel}>Partia {state.gameNumber}</Text>
           <Pressable style={styles.endButton} onPress={() => setShowMatchSummary(true)}>
+            <Ionicons name="power" size={12} color="#241300" />
             <Text style={styles.endButtonText}>Zakończ mecz</Text>
           </Pressable>
         </View>
@@ -171,27 +187,37 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           />
         </View>
 
+        <View style={styles.secondaryRow}>
+          <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={newShot}>
+            <Ionicons name="refresh" size={16} color={colors.accent} />
+            <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
+              Nowe uderzenie
+            </Text>
+          </Pressable>
+          <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={switchPlayer}>
+            <Ionicons name="swap-horizontal" size={16} color={colors.accent} />
+            <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
+              Zmiana zawodnika
+            </Text>
+          </Pressable>
+        </View>
+
         <View style={styles.primaryRow}>
           <Pressable
             style={[styles.primaryButton, state.isExpired && styles.primaryButtonDisabled]}
             onPress={toggleRunning}
             disabled={state.isExpired || state.isMatchTimeExpired}
           >
+            <Ionicons
+              name={state.isRunning ? 'pause' : 'play'}
+              size={18}
+              color={state.isExpired ? colors.disabledText : colors.accentText}
+            />
             <Text style={styles.primaryButtonText}>{state.isRunning ? 'Pauza' : 'Start'}</Text>
           </Pressable>
-          <Pressable style={styles.shotButton} onPress={newShot}>
-            <Text style={styles.shotButtonText}>Nowe uderzenie</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.secondaryRow}>
-          <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={switchPlayer}>
-            <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
-              Zmiana zawodnika
-            </Text>
-          </Pressable>
-          <Pressable style={styles.secondaryButton} onPress={() => setPickingWinner(true)}>
-            <Text style={styles.secondaryButtonText}>Zakończ partię</Text>
+          <Pressable style={styles.endGameButton} onPress={() => setPickingWinner(true)}>
+            <Ionicons name="flag" size={16} color={colors.text} />
+            <Text style={styles.endGameButtonText}>Zakończ partię</Text>
           </Pressable>
         </View>
       </View>
@@ -276,11 +302,33 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
             </View>
           )}
         </View>
-        <Pressable style={styles.winnerButton} onPress={onEndMatch}>
+        <Pressable style={styles.winnerButton} onPress={handleRequestEndMatch}>
           <Text style={styles.winnerButtonText}>Powrót do ustawień</Text>
         </Pressable>
         <Pressable style={styles.modalCancel} onPress={() => setShowMatchSummary(false)}>
           <Text style={styles.modalCancelText}>Wróć do meczu</Text>
+        </Pressable>
+      </AppModal>
+
+      <AppModal visible={confirmingEndMatch}>
+        <Ionicons
+          name="power"
+          size={28}
+          color={colors.warning}
+          style={{ alignSelf: 'center', marginBottom: 12 }}
+        />
+        <Text style={styles.modalTitle}>Zakończyć mecz?</Text>
+        <Text style={styles.modalSubtitle}>
+          Wynik zostanie zapisany w podsumowaniu. Tej operacji nie można cofnąć.
+        </Text>
+        <Pressable
+          style={[styles.winnerButton, { backgroundColor: colors.warning, marginTop: 16 }]}
+          onPress={handleConfirmEndMatch}
+        >
+          <Text style={[styles.winnerButtonText, { color: '#241300' }]}>Tak, zakończ mecz</Text>
+        </Pressable>
+        <Pressable style={styles.modalCancel} onPress={handleCancelEndMatch}>
+          <Text style={styles.modalCancelText}>Anuluj</Text>
         </Pressable>
       </AppModal>
     </View>
@@ -334,6 +382,9 @@ function createStyles(colors: ThemeColors) {
       fontWeight: '600',
     },
     endButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
       backgroundColor: colors.warning,
       paddingVertical: 6,
       paddingHorizontal: 14,
@@ -397,10 +448,13 @@ function createStyles(colors: ThemeColors) {
     },
     primaryButton: {
       flex: 1,
+      flexDirection: 'row',
+      gap: 8,
       backgroundColor: colors.accent,
       borderRadius: 16,
       paddingVertical: 18,
       alignItems: 'center',
+      justifyContent: 'center',
       marginHorizontal: 4,
     },
     primaryButtonDisabled: {
@@ -411,18 +465,19 @@ function createStyles(colors: ThemeColors) {
       fontSize: 20,
       fontWeight: '700',
     },
-    shotButton: {
+    endGameButton: {
       flex: 1,
+      flexDirection: 'row',
+      gap: 8,
       backgroundColor: colors.surface,
       borderRadius: 16,
       paddingVertical: 18,
       alignItems: 'center',
+      justifyContent: 'center',
       marginHorizontal: 4,
-      borderWidth: 2,
-      borderColor: colors.accent,
     },
-    shotButtonText: {
-      color: colors.accent,
+    endGameButtonText: {
+      color: colors.text,
       fontSize: 16,
       fontWeight: '700',
     },
@@ -433,10 +488,13 @@ function createStyles(colors: ThemeColors) {
     },
     secondaryButton: {
       flex: 1,
+      flexDirection: 'row',
+      gap: 7,
       backgroundColor: colors.surface,
       borderRadius: 14,
       paddingVertical: 14,
       alignItems: 'center',
+      justifyContent: 'center',
       marginHorizontal: 4,
       borderWidth: 2,
       borderColor: 'transparent',

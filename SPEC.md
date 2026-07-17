@@ -45,7 +45,9 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    przekroczenia czasu/fauli), a także listę wyników poszczególnych partii,
    zanim wróci do ekranu ustawień. Każde uderzenie (zakończone nowym
    uderzeniem, zmianą zawodnika, końcem partii lub przekroczeniem czasu)
-   jest rejestrowane z czasem jego trwania.
+   jest rejestrowane z czasem jego trwania. Zakończenie meczu wymaga
+   potwierdzenia (dialog "Zakończyć mecz?"); po potwierdzeniu aplikacja
+   od razu wraca do ekranu ustawień, gotowa na konfigurację kolejnego meczu.
 8. **Łączny czas meczu (opcjonalny)** — dodatkowy, malejący licznik całego
    meczu, niezależny od zegara na pojedyncze uderzenie. Włączany/wyłączany
    w ustawieniach, ponieważ profesjonalne rozgrywki pool zwykle **nie** mają
@@ -69,6 +71,12 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
     oznacza stan aktywny/dostępny (przedłużenie, stepper, przełącznik czasu
     meczu), szary — nieaktywny/wyczerpany, a żółty/czerwony — ostrzeżenie
     10 s / faul czasowy niezależnie od gracza.
+13. **Ikony przycisków** (Ionicons z `@expo/vector-icons`) — play/pause dla
+    Start/Pauza, odśwież dla Nowego uderzenia, dwie strzałki dla Zmiany
+    zawodnika, flaga dla Zakończenia partii, power dla Zakończenia meczu,
+    klepsydra dla Przedłużenia. Start/Pauza i Zakończ partię są w tym samym
+    (drugim) rzędzie przycisków, Nowe uderzenie i Zmiana zawodnika w rzędzie
+    pierwszym.
 
 Poza zakresem MVP (świadomie pominięte, można dodać później):
 wielu sędziów/urządzeń w sieci, historia wielu meczów (obecnie tylko bieżący

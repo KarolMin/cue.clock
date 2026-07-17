@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ThemeColors } from '../theme/colors';
@@ -54,6 +55,11 @@ export function PlayerPanel({
         onPress={onUseExtension}
         disabled={!canUseExtension}
       >
+        <Ionicons
+          name="hourglass"
+          size={13}
+          color={canUseExtension ? colors.accentText : colors.disabledText}
+        />
         <Text style={[styles.extButtonText, !canUseExtension && styles.extButtonTextDisabled]}>
           Przedłużenie
         </Text>
@@ -96,6 +102,9 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.disabledSurface,
     },
     extButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
       backgroundColor: colors.accent,
       paddingVertical: 8,
       paddingHorizontal: 14,
