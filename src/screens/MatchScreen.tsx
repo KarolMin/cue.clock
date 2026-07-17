@@ -303,7 +303,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           )}
         </View>
         <Pressable style={styles.winnerButton} onPress={handleRequestEndMatch}>
-          <Text style={styles.winnerButtonText}>Powrót do ustawień</Text>
+          <Text style={styles.winnerButtonText}>Zakończ mecz</Text>
         </Pressable>
         <Pressable style={styles.modalCancel} onPress={() => setShowMatchSummary(false)}>
           <Text style={styles.modalCancelText}>Wróć do meczu</Text>
