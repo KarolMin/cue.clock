@@ -113,3 +113,14 @@ sam wystawi darmowy certyfikat SSL (zwykle w ciągu kilkunastu minut).
 Od tego momentu strona jest w pełni zarządzana przez GitHub Actions —
 wystarczy pushować zmiany do `main`, a `https://cueclock.online` zaktualizuje
 się automatycznie.
+
+### 5. Statystyki odwiedzin (Cloudflare Web Analytics)
+
+Strona ma wpięty darmowy, prywatny licznik odwiedzin (bez banera cookie —
+Cloudflare Web Analytics nie zbiera danych osobowych). Skrypt jest w
+`public/index.html`, kopiowanym automatycznie do builda. Statystyki
+(wizyty, strony, referrery, kraje) sprawdzisz w panelu
+[dash.cloudflare.com](https://dash.cloudflare.com) → **Analytics & Logs →
+Web Analytics** → `cueclock.online`. GitHub samo w sobie **nie** śledzi
+ruchu na opublikowanej stronie (zakładka Traffic w repo pokazuje tylko
+odwiedziny samego repozytorium na github.com, nie strony).
