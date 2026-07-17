@@ -302,8 +302,9 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
             </View>
           )}
         </View>
-        <Pressable style={styles.winnerButton} onPress={handleRequestEndMatch}>
-          <Text style={styles.winnerButtonText}>Zakończ mecz</Text>
+        <Pressable style={[styles.winnerButton, styles.endMatchButton]} onPress={handleRequestEndMatch}>
+          <Ionicons name="power" size={16} color="#241300" />
+          <Text style={[styles.winnerButtonText, styles.endMatchButtonText]}>Zakończ mecz</Text>
         </Pressable>
         <Pressable style={styles.modalCancel} onPress={() => setShowMatchSummary(false)}>
           <Text style={styles.modalCancelText}>Wróć do meczu</Text>
@@ -322,10 +323,11 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           Wynik zostanie zapisany w podsumowaniu. Tej operacji nie można cofnąć.
         </Text>
         <Pressable
-          style={[styles.winnerButton, { backgroundColor: colors.warning, marginTop: 16 }]}
+          style={[styles.winnerButton, styles.endMatchButton, { marginTop: 16 }]}
           onPress={handleConfirmEndMatch}
         >
-          <Text style={[styles.winnerButtonText, { color: '#241300' }]}>Tak, zakończ mecz</Text>
+          <Ionicons name="power" size={16} color="#241300" />
+          <Text style={[styles.winnerButtonText, styles.endMatchButtonText]}>Tak, zakończ mecz</Text>
         </Pressable>
         <Pressable style={styles.modalCancel} onPress={handleCancelEndMatch}>
           <Text style={styles.modalCancelText}>Anuluj</Text>
@@ -560,6 +562,15 @@ function createStyles(colors: ThemeColors) {
       color: colors.accentText,
       fontSize: 16,
       fontWeight: '700',
+    },
+    endMatchButton: {
+      flexDirection: 'row',
+      gap: 8,
+      justifyContent: 'center',
+      backgroundColor: colors.warning,
+    },
+    endMatchButtonText: {
+      color: '#241300',
     },
     modalCancel: {
       alignItems: 'center',
