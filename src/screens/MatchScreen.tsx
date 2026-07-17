@@ -189,13 +189,13 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
 
         <View style={styles.secondaryRow}>
           <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={newShot}>
-            <Ionicons name="refresh" size={16} color={colors.accent} />
+            <Ionicons name="refresh" size={18} color={colors.accent} />
             <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
               Nowe uderzenie
             </Text>
           </Pressable>
           <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={switchPlayer}>
-            <Ionicons name="swap-horizontal" size={16} color={colors.accent} />
+            <Ionicons name="swap-horizontal" size={18} color={colors.accent} />
             <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
               Zmiana zawodnika
             </Text>
@@ -484,15 +484,15 @@ function createStyles(colors: ThemeColors) {
     secondaryRow: {
       flexDirection: 'row',
       marginTop: 12,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     secondaryButton: {
       flex: 1,
       flexDirection: 'row',
-      gap: 7,
+      gap: 8,
       backgroundColor: colors.surface,
-      borderRadius: 14,
-      paddingVertical: 14,
+      borderRadius: 16,
+      paddingVertical: 18,
       alignItems: 'center',
       justifyContent: 'center',
       marginHorizontal: 4,
@@ -504,8 +504,8 @@ function createStyles(colors: ThemeColors) {
     },
     secondaryButtonText: {
       color: colors.text,
-      fontSize: 14,
-      fontWeight: '600',
+      fontSize: 16,
+      fontWeight: '700',
     },
     secondaryButtonTextHighlighted: {
       color: colors.accent,
