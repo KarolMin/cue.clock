@@ -21,6 +21,7 @@ export interface MatchState {
   shotElapsedMs: number;
   totalRemainingMs: number | null;
   matchElapsedMs: number;
+  matchStarted: boolean;
   extensionsUsed: Record<PlayerId, number>;
   totalExtensionsUsed: Record<PlayerId, number>;
   totalFouls: Record<PlayerId, number>;
@@ -50,6 +51,7 @@ function initialState(settings: Settings): MatchState {
     shotElapsedMs: 0,
     totalRemainingMs: settings.totalMatchEnabled ? settings.totalMatchMinutes * 60 * 1000 : null,
     matchElapsedMs: 0,
+    matchStarted: false,
     extensionsUsed: { 1: 0, 2: 0 },
     totalExtensionsUsed: { 1: 0, 2: 0 },
     totalFouls: { 1: 0, 2: 0 },
@@ -71,30 +73,30 @@ function logShotIfNeeded(prev: MatchState): ShotRecord[] {
 
 export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
   const [state, setState] = useState<MatchState>(() => initialState(settings));
-  const lastTsRef = useRef<number | null>(null);
+  const shotTsRef = useRef<number | null>(null);
+  const matchTsRef = useRef<number | null>(null);
   const warningFiredRef = useRef(false);
   const lastTickSecondRef = useRef<number | null>(null);
   const callbacksRef = useRef(callbacks);
   callbacksRef.current = callbacks;
 
+  // Shot clock: counts down only while actively running (Start/Pauza).
   useEffect(() => {
     if (!state.isRunning) {
-      lastTsRef.current = null;
+      shotTsRef.current = null;
       return;
     }
     const interval = setInterval(() => {
       const now = Date.now();
-      const last = lastTsRef.current ?? now;
+      const last = shotTsRef.current ?? now;
       const deltaMs = now - last;
-      lastTsRef.current = now;
+      shotTsRef.current = now;
 
       setState((prev) => {
         if (!prev.isRunning) return prev;
 
         const shotRemainingMs = Math.max(0, prev.shotRemainingMs - deltaMs);
         const shotElapsedMs = prev.shotElapsedMs + deltaMs;
-        const totalRemainingMs =
-          prev.totalRemainingMs === null ? null : Math.max(0, prev.totalRemainingMs - deltaMs);
 
         if (!warningFiredRef.current && shotRemainingMs <= WARNING_THRESHOLD_MS && shotRemainingMs > 0) {
           warningFiredRef.current = true;
@@ -112,9 +114,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         }
 
         const shotJustExpired = shotRemainingMs === 0 && !prev.isExpired;
-        const matchJustExpired =
-          totalRemainingMs === 0 && prev.totalRemainingMs !== null && prev.totalRemainingMs > 0;
-        if (shotJustExpired || matchJustExpired) {
+        if (shotJustExpired) {
           callbacksRef.current.onBuzzer?.();
         }
 
@@ -122,11 +122,8 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           ...prev,
           shotRemainingMs,
           shotElapsedMs: shotJustExpired ? 0 : shotElapsedMs,
-          totalRemainingMs,
-          matchElapsedMs: prev.matchElapsedMs + deltaMs,
           isExpired: prev.isExpired || shotJustExpired,
-          isMatchTimeExpired: prev.isMatchTimeExpired || matchJustExpired,
-          isRunning: shotJustExpired || matchJustExpired ? false : prev.isRunning,
+          isRunning: shotJustExpired ? false : prev.isRunning,
           totalFouls: shotJustExpired
             ? { ...prev.totalFouls, [prev.currentPlayer]: prev.totalFouls[prev.currentPlayer] + 1 }
             : prev.totalFouls,
@@ -140,10 +137,49 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
     return () => clearInterval(interval);
   }, [state.isRunning]);
 
+  // Match clock: once the match has started, keeps running continuously
+  // (matchElapsedMs, and the optional total-match countdown) regardless of
+  // shot-clock pauses or time-out fouls — a foul doesn't pause the match.
+  useEffect(() => {
+    if (!state.matchStarted || state.isMatchTimeExpired) {
+      matchTsRef.current = null;
+      return;
+    }
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const last = matchTsRef.current ?? now;
+      const deltaMs = now - last;
+      matchTsRef.current = now;
+
+      setState((prev) => {
+        if (!prev.matchStarted || prev.isMatchTimeExpired) return prev;
+
+        const totalRemainingMs =
+          prev.totalRemainingMs === null ? null : Math.max(0, prev.totalRemainingMs - deltaMs);
+        const matchJustExpired =
+          totalRemainingMs === 0 && prev.totalRemainingMs !== null && prev.totalRemainingMs > 0;
+        if (matchJustExpired) {
+          callbacksRef.current.onBuzzer?.();
+        }
+
+        return {
+          ...prev,
+          matchElapsedMs: prev.matchElapsedMs + deltaMs,
+          totalRemainingMs,
+          isMatchTimeExpired: prev.isMatchTimeExpired || matchJustExpired,
+          isRunning: matchJustExpired ? false : prev.isRunning,
+        };
+      });
+    }, TICK_MS);
+
+    return () => clearInterval(interval);
+  }, [state.matchStarted, state.isMatchTimeExpired]);
+
   const toggleRunning = useCallback(() => {
     setState((prev) => {
       if (prev.isExpired || prev.isMatchTimeExpired) return prev;
-      return { ...prev, isRunning: !prev.isRunning };
+      const isRunning = !prev.isRunning;
+      return { ...prev, isRunning, matchStarted: prev.matchStarted || isRunning };
     });
   }, []);
 
