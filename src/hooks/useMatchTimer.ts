@@ -192,6 +192,8 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
       shotElapsedMs: 0,
       shotLog: logShotIfNeeded(prev),
       isExpired: false,
+      isRunning: !prev.isMatchTimeExpired,
+      matchStarted: true,
     }));
   }, [settings.shotSeconds]);
 
@@ -205,6 +207,8 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
       shotElapsedMs: 0,
       shotLog: logShotIfNeeded(prev),
       isExpired: false,
+      isRunning: !prev.isMatchTimeExpired,
+      matchStarted: true,
     }));
   }, [settings.shotSeconds]);
 
