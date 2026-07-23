@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -67,7 +68,10 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
-          <Text style={styles.title}>cue.clock</Text>
+          <View style={styles.titleRow}>
+            <Image source={require('../../assets/app-logo.png')} style={styles.titleLogo} />
+            <Text style={styles.title}>cue.clock</Text>
+          </View>
           <Text style={styles.subtitle}>Zegar 4 fun.</Text>
           <Pressable
             style={styles.tutorialLink}
@@ -211,6 +215,16 @@ function createStyles(colors: ThemeColors) {
       padding: 20,
       paddingTop: 60,
       paddingBottom: 40,
+    },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+    },
+    titleLogo: {
+      width: 40,
+      height: 40,
     },
     title: {
       color: colors.text,
