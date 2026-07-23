@@ -128,7 +128,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
         <View style={styles.header}>
           <Text style={styles.gameLabel}>Partia {state.gameNumber}</Text>
           <Pressable style={styles.endButton} onPress={() => setShowMatchSummary(true)}>
-            <Ionicons name="power" size={12} color="#241300" />
+            <Ionicons name="power" size={12} color={colors.warningText} />
             <Text style={styles.endButtonText}>Zakończ mecz</Text>
           </Pressable>
         </View>
@@ -170,6 +170,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
               state.extensionsUsed[1] < settings.extensionsPerGame
             }
             onUseExtension={useExtension}
+            onPressPlayer={() => (state.currentPlayer === 1 ? newShot() : switchPlayer())}
           />
           <View style={styles.playersGap} />
           <PlayerPanel
@@ -184,6 +185,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
               state.extensionsUsed[2] < settings.extensionsPerGame
             }
             onUseExtension={useExtension}
+            onPressPlayer={() => (state.currentPlayer === 2 ? newShot() : switchPlayer())}
           />
         </View>
 
@@ -303,7 +305,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           )}
         </View>
         <Pressable style={[styles.winnerButton, styles.endMatchButton]} onPress={handleRequestEndMatch}>
-          <Ionicons name="power" size={16} color="#241300" />
+          <Ionicons name="power" size={16} color={colors.warningText} />
           <Text style={[styles.winnerButtonText, styles.endMatchButtonText]}>Zakończ mecz</Text>
         </Pressable>
         <Pressable style={styles.modalCancel} onPress={() => setShowMatchSummary(false)}>
@@ -326,7 +328,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           style={[styles.winnerButton, styles.endMatchButton, { marginTop: 16 }]}
           onPress={handleConfirmEndMatch}
         >
-          <Ionicons name="power" size={16} color="#241300" />
+          <Ionicons name="power" size={16} color={colors.warningText} />
           <Text style={[styles.winnerButtonText, styles.endMatchButtonText]}>Tak, zakończ mecz</Text>
         </Pressable>
         <Pressable style={styles.modalCancel} onPress={handleCancelEndMatch}>
@@ -393,7 +395,7 @@ function createStyles(colors: ThemeColors) {
       borderRadius: 999,
     },
     endButtonText: {
-      color: '#241300',
+      color: colors.warningText,
       fontSize: 13,
       fontWeight: '700',
     },
@@ -570,7 +572,7 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.warning,
     },
     endMatchButtonText: {
-      color: '#241300',
+      color: colors.warningText,
     },
     modalCancel: {
       alignItems: 'center',

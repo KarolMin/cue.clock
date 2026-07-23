@@ -8,6 +8,7 @@ export interface ThemeColors {
   accentText: string;
   danger: string;
   warning: string;
+  warningText: string;
   inputBackground: string;
   placeholder: string;
   disabledSurface: string;
@@ -28,6 +29,7 @@ export const darkColors: ThemeColors = {
   accentText: '#ffffff',
   danger: '#ff4d4f',
   warning: '#f5a623',
+  warningText: '#241300',
   inputBackground: '#161616',
   placeholder: '#5a6070',
   disabledSurface: '#2a2f3a',
@@ -46,6 +48,7 @@ export const lightColors: ThemeColors = {
   accentText: '#ffffff',
   danger: '#d92d2f',
   warning: '#a15c00',
+  warningText: '#ffffff',
   inputBackground: '#eaecef',
   placeholder: '#9098a3',
   disabledSurface: '#dde0e4',
