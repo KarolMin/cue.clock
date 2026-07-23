@@ -21,6 +21,8 @@ export interface MatchState {
   shotElapsedMs: number;
   totalRemainingMs: number | null;
   matchElapsedMs: number;
+  totalGameRemainingMs: number | null;
+  gameElapsedMs: number;
   matchStarted: boolean;
   extensionsUsed: Record<PlayerId, number>;
   totalExtensionsUsed: Record<PlayerId, number>;
@@ -31,6 +33,7 @@ export interface MatchState {
   isRunning: boolean;
   isExpired: boolean;
   isMatchTimeExpired: boolean;
+  isGameTimeExpired: boolean;
 }
 
 interface Callbacks {
@@ -51,6 +54,8 @@ function initialState(settings: Settings): MatchState {
     shotElapsedMs: 0,
     totalRemainingMs: settings.totalMatchEnabled ? settings.totalMatchMinutes * 60 * 1000 : null,
     matchElapsedMs: 0,
+    totalGameRemainingMs: settings.totalGameEnabled ? settings.totalGameMinutes * 60 * 1000 : null,
+    gameElapsedMs: 0,
     matchStarted: false,
     extensionsUsed: { 1: 0, 2: 0 },
     totalExtensionsUsed: { 1: 0, 2: 0 },
@@ -61,6 +66,7 @@ function initialState(settings: Settings): MatchState {
     isRunning: false,
     isExpired: false,
     isMatchTimeExpired: false,
+    isGameTimeExpired: false,
   };
 }
 
@@ -158,16 +164,31 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           prev.totalRemainingMs === null ? null : Math.max(0, prev.totalRemainingMs - deltaMs);
         const matchJustExpired =
           totalRemainingMs === 0 && prev.totalRemainingMs !== null && prev.totalRemainingMs > 0;
-        if (matchJustExpired) {
+
+        const totalGameRemainingMs = prev.isGameTimeExpired
+          ? prev.totalGameRemainingMs
+          : prev.totalGameRemainingMs === null
+            ? null
+            : Math.max(0, prev.totalGameRemainingMs - deltaMs);
+        const gameJustExpired =
+          !prev.isGameTimeExpired &&
+          totalGameRemainingMs === 0 &&
+          prev.totalGameRemainingMs !== null &&
+          prev.totalGameRemainingMs > 0;
+
+        if (matchJustExpired || gameJustExpired) {
           callbacksRef.current.onBuzzer?.();
         }
 
         return {
           ...prev,
           matchElapsedMs: prev.matchElapsedMs + deltaMs,
+          gameElapsedMs: prev.isGameTimeExpired ? prev.gameElapsedMs : prev.gameElapsedMs + deltaMs,
           totalRemainingMs,
+          totalGameRemainingMs,
           isMatchTimeExpired: prev.isMatchTimeExpired || matchJustExpired,
-          isRunning: matchJustExpired ? false : prev.isRunning,
+          isGameTimeExpired: prev.isGameTimeExpired || gameJustExpired,
+          isRunning: matchJustExpired || gameJustExpired ? false : prev.isRunning,
         };
       });
     }, TICK_MS);
@@ -177,7 +198,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
 
   const toggleRunning = useCallback(() => {
     setState((prev) => {
-      if (prev.isExpired || prev.isMatchTimeExpired) return prev;
+      if (prev.isExpired || prev.isMatchTimeExpired || prev.isGameTimeExpired) return prev;
       const isRunning = !prev.isRunning;
       return { ...prev, isRunning, matchStarted: prev.matchStarted || isRunning };
     });
@@ -192,7 +213,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
       shotElapsedMs: 0,
       shotLog: logShotIfNeeded(prev),
       isExpired: false,
-      isRunning: !prev.isMatchTimeExpired,
+      isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
       matchStarted: true,
     }));
   }, [settings.shotSeconds]);
@@ -207,7 +228,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
       shotElapsedMs: 0,
       shotLog: logShotIfNeeded(prev),
       isExpired: false,
-      isRunning: !prev.isMatchTimeExpired,
+      isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
       matchStarted: true,
     }));
   }, [settings.shotSeconds]);
@@ -244,12 +265,15 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         gameNumber: prev.gameNumber + 1,
         shotRemainingMs: settings.shotSeconds * 1000,
         shotElapsedMs: 0,
+        gameElapsedMs: 0,
+        totalGameRemainingMs: settings.totalGameEnabled ? settings.totalGameMinutes * 60 * 1000 : null,
+        isGameTimeExpired: false,
         extensionsUsed: { 1: 0, 2: 0 },
         isExpired: false,
         isRunning: false,
       }));
     },
-    [settings.shotSeconds]
+    [settings.shotSeconds, settings.totalGameEnabled, settings.totalGameMinutes]
   );
 
   return { state, toggleRunning, newShot, switchPlayer, useExtension, endGame };
