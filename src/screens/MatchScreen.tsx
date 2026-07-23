@@ -142,11 +142,23 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           <Text style={styles.raceHint}>Grane do {settings.raceToGames} wygranych</Text>
         )}
 
-        {state.totalRemainingMs !== null && (
+        <View style={styles.elapsedRow}>
+          <Text style={styles.elapsedTime}>Czas partii: {formatMinutesSeconds(state.gameElapsedMs)}</Text>
+          <Text style={styles.elapsedTime}>Czas meczu: {formatMinutesSeconds(state.matchElapsedMs)}</Text>
+        </View>
+
+        {(state.totalGameRemainingMs !== null || state.totalRemainingMs !== null) && (
           <View style={styles.totalRow}>
-            <Text style={[styles.totalTime, state.isMatchTimeExpired && styles.totalTimeExpired]}>
-              Czas meczu: {formatMinutesSeconds(state.totalRemainingMs)}
-            </Text>
+            {state.totalGameRemainingMs !== null && (
+              <Text style={[styles.totalTime, state.isGameTimeExpired && styles.totalTimeExpired]}>
+                Pozostały czas partii: {formatMinutesSeconds(state.totalGameRemainingMs)}
+              </Text>
+            )}
+            {state.totalRemainingMs !== null && (
+              <Text style={[styles.totalTime, state.isMatchTimeExpired && styles.totalTimeExpired]}>
+                Pozostały czas meczu: {formatMinutesSeconds(state.totalRemainingMs)}
+              </Text>
+            )}
           </View>
         )}
 
@@ -206,14 +218,22 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
 
         <View style={styles.primaryRow}>
           <Pressable
-            style={[styles.primaryButton, state.isExpired && styles.primaryButtonDisabled]}
+            style={[
+              styles.primaryButton,
+              (state.isExpired || state.isMatchTimeExpired || state.isGameTimeExpired) &&
+                styles.primaryButtonDisabled,
+            ]}
             onPress={toggleRunning}
-            disabled={state.isExpired || state.isMatchTimeExpired}
+            disabled={state.isExpired || state.isMatchTimeExpired || state.isGameTimeExpired}
           >
             <Ionicons
               name={state.isRunning ? 'pause' : 'play'}
               size={18}
-              color={state.isExpired ? colors.disabledText : colors.accentText}
+              color={
+                state.isExpired || state.isMatchTimeExpired || state.isGameTimeExpired
+                  ? colors.disabledText
+                  : colors.accentText
+              }
             />
             <Text style={styles.primaryButtonText}>{state.isRunning ? 'Pauza' : 'Start'}</Text>
           </Pressable>
@@ -411,6 +431,16 @@ function createStyles(colors: ThemeColors) {
       fontSize: 12,
       textAlign: 'center',
       marginTop: 2,
+    },
+    elapsedRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 16,
+      marginTop: 6,
+    },
+    elapsedTime: {
+      color: colors.textSecondary,
+      fontSize: 12,
     },
     totalRow: {
       alignItems: 'center',

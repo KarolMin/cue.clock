@@ -156,6 +156,29 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             )}
           </View>
 
+          <View style={styles.section}>
+            <View style={styles.switchRow}>
+              <Text style={styles.sectionTitle}>Maksymalny czas partii</Text>
+              <Switch
+                value={settings.totalGameEnabled}
+                onValueChange={(v) => update({ totalGameEnabled: v })}
+                trackColor={{ false: colors.disabledSurface, true: colors.accent }}
+                thumbColor="#ffffff"
+              />
+            </View>
+            {settings.totalGameEnabled && (
+              <NumberStepper
+                label="Czas partii"
+                value={settings.totalGameMinutes}
+                onChange={(v) => update({ totalGameMinutes: v })}
+                min={LIMITS.totalGameMinutes.min}
+                max={LIMITS.totalGameMinutes.max}
+                step={1}
+                unit="min"
+              />
+            )}
+          </View>
+
           <Pressable style={styles.startButton} onPress={onStart}>
             <Text style={styles.startButtonText}>Rozpocznij mecz</Text>
           </Pressable>

@@ -53,11 +53,20 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    w ustawieniach, ponieważ profesjonalne rozgrywki pool zwykle **nie** mają
    limitu czasu na cały mecz (grane są "do X wygranych partii"), ale opcja
    jest przydatna np. do gry rekreacyjnej lub rezerwacji stołu na czas.
+8b. **Maksymalny czas partii (opcjonalny)** — analogiczny, opcjonalny,
+    malejący licznik pojedynczej partii; niezależny od zegara na uderzenie
+    i od łącznego czasu meczu. Po jego przekroczeniu zegar uderzenia się
+    zatrzymuje (podobnie jak przy przekroczeniu łącznego czasu meczu) —
+    partię trzeba zakończyć ręcznie. Reset przy każdej nowej partii.
+    Aktualny czas trwania partii oraz łączny czas trwania meczu (liczniki
+    narastające, niezależne od włączenia limitów) są widoczne na ekranie
+    meczu przez cały czas jego trwania.
 9. **Konfiguracja** (ekran ustawień, zapisywana lokalnie na urządzeniu):
    - czas na uderzenie (s),
    - czas przedłużenia (s),
    - liczba przedłużeń na partię,
    - włącznik + długość łącznego czasu meczu (min),
+   - włącznik + długość maksymalnego czasu partii (min),
    - nazwy obu zawodników — pole zaznacza cały tekst po dotknięciu (łatwa
      podmiana) i podpowiada ostatnio używane imiona z poprzednich meczów.
 10. Utrzymanie ekranu włączonego podczas trwania meczu (`expo-keep-awake`),
@@ -96,6 +105,7 @@ rozgrywkach zawodowych (Matchroom World Nineball Tour / profesjonalny 9-ball):
 | Czas przedłużenia                 | **30 s**         | World Nineball Tour: jedno przedłużenie = dodatkowe 30 s |
 | Liczba przedłużeń na partię       | **1**            | Zasada "jedno przedłużenie na gracza na partię (rack)" konsekwentnie stosowana w głównych turniejach (m.in. World Nineball Tour, US Open 9-Ball) |
 | Łączny czas meczu                 | **wyłączony** (domyślnie 60 min, gdy włączony) | W profesjonalnym pool mecze nie mają twardego limitu czasu (grane są do X wygranych partii), więc opcja jest domyślnie wyłączona; 60 min to rozsądny punkt startowy dla gry rekreacyjnej/rezerwacji stołu |
+| Maksymalny czas partii             | **wyłączony** (domyślnie 15 min, gdy włączony) | Analogicznie do łącznego czasu meczu — profesjonalne rozgrywki nie limitują czasu partii, ale to przydatne dla gry rekreacyjnej/rezerwacji stołu; 15 min to rozsądny punkt startowy dla pojedynczej partii |
 
 Warianty spotykane w innych regulaminach (dla kontekstu, nieużywane jako
 domyślne): 35 s na uderzenie z 25-sekundowym przedłużeniem; 40 s na uderzenie
@@ -120,6 +130,8 @@ interface Settings {
   extensionsPerGame: number;    // domyślnie 1, zakres 0–5
   totalMatchEnabled: boolean;   // domyślnie false
   totalMatchMinutes: number;    // domyślnie 60, zakres 1–999
+  totalGameEnabled: boolean;    // domyślnie false
+  totalGameMinutes: number;     // domyślnie 15, zakres 1–120
   player1Name: string;          // domyślnie "Gracz 1"
   player2Name: string;          // domyślnie "Gracz 2"
 }
@@ -129,9 +141,14 @@ interface MatchState {
   gameNumber: number;
   shotRemainingMs: number;
   totalRemainingMs: number | null;   // null gdy totalMatchEnabled = false
+  matchElapsedMs: number;            // narastający czas trwania meczu
+  totalGameRemainingMs: number | null; // null gdy totalGameEnabled = false
+  gameElapsedMs: number;              // narastający czas trwania bieżącej partii
   extensionsUsed: { 1: number; 2: number }; // reset przy "nowa partia"
   isRunning: boolean;
   isExpired: boolean;                // zegar uderzenia doszedł do 0
+  isMatchTimeExpired: boolean;
+  isGameTimeExpired: boolean;
 }
 ```
 
