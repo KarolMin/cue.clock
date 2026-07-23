@@ -1,6 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -66,7 +68,14 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           <Text style={styles.title}>cue.clock</Text>
-          <Text style={styles.subtitle}>Zegar strzałowy do bilarda</Text>
+          <Text style={styles.subtitle}>Zegar 4 fun.</Text>
+          <Pressable
+            style={styles.tutorialLink}
+            onPress={() => Linking.openURL('https://cueclock.online/tutorial.mp4')}
+          >
+            <Ionicons name="play-circle" size={16} color={colors.accent} />
+            <Text style={styles.tutorialLinkText}>Zobacz samouczek (wideo)</Text>
+          </Pressable>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Zawodnicy</Text>
@@ -213,7 +222,19 @@ function createStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       fontSize: 14,
       textAlign: 'center',
+      marginBottom: 12,
+    },
+    tutorialLink: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
       marginBottom: 28,
+    },
+    tutorialLinkText: {
+      color: colors.accent,
+      fontSize: 14,
+      fontWeight: '700',
     },
     section: {
       backgroundColor: colors.surface,
