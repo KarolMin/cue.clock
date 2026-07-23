@@ -15,6 +15,7 @@ export interface ThemeColors {
   disabledText: string;
   player1: string;
   player2: string;
+  panelInactiveBorder: string;
 }
 
 // Accent (active/enabled state) is a classic billiard cloth green.
@@ -36,6 +37,7 @@ export const darkColors: ThemeColors = {
   disabledText: '#5a6070',
   player1: '#f24141',
   player2: '#3b82f6',
+  panelInactiveBorder: '#ffffff',
 };
 
 export const lightColors: ThemeColors = {
@@ -55,4 +57,5 @@ export const lightColors: ThemeColors = {
   disabledText: '#9aa0aa',
   player1: '#dc2626',
   player2: '#2563eb',
+  panelInactiveBorder: '#000000',
 };

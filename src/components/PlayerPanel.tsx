@@ -76,26 +76,26 @@ function createStyles(colors: ThemeColors) {
     panel: {
       flex: 1,
       backgroundColor: colors.surface,
-      borderRadius: 16,
-      padding: 14,
+      borderRadius: 20,
+      padding: 22,
       alignItems: 'center',
-      borderWidth: 2,
-      borderColor: 'transparent',
+      borderWidth: 3,
+      borderColor: colors.panelInactiveBorder,
     },
     name: {
       color: colors.textSecondary,
-      fontSize: 16,
+      fontSize: 20,
       fontWeight: '600',
-      marginBottom: 8,
+      marginBottom: 10,
     },
     dotsRow: {
       flexDirection: 'row',
-      marginBottom: 10,
+      marginBottom: 12,
     },
     dot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
+      width: 12,
+      height: 12,
+      borderRadius: 6,
       marginHorizontal: 3,
     },
     dotAvailable: {
@@ -107,11 +107,11 @@ function createStyles(colors: ThemeColors) {
     extButton: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 5,
+      gap: 6,
       backgroundColor: colors.accent,
-      paddingVertical: 8,
-      paddingHorizontal: 14,
-      borderRadius: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 12,
     },
     extButtonDisabled: {
       backgroundColor: colors.disabledSurface,
@@ -119,7 +119,7 @@ function createStyles(colors: ThemeColors) {
     extButtonText: {
       color: colors.accentText,
       fontWeight: '700',
-      fontSize: 13,
+      fontSize: 14,
     },
     extButtonTextDisabled: {
       color: colors.disabledText,
