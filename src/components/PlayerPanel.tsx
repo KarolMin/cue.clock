@@ -12,6 +12,7 @@ interface Props {
   extensionsPerGame: number;
   canUseExtension: boolean;
   onUseExtension: () => void;
+  onPressPlayer: () => void;
 }
 
 export function PlayerPanel({
@@ -22,13 +23,15 @@ export function PlayerPanel({
   extensionsPerGame,
   canUseExtension,
   onUseExtension,
+  onPressPlayer,
 }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const extensionsLeft = extensionsPerGame - extensionsUsed;
 
   return (
-    <View
+    <Pressable
+      onPress={onPressPlayer}
       style={[
         styles.panel,
         isActive && { borderColor: accentColor, backgroundColor: `${accentColor}1a` },
@@ -64,7 +67,7 @@ export function PlayerPanel({
           Przedłużenie
         </Text>
       </Pressable>
-    </View>
+    </Pressable>
   );
 }
 
