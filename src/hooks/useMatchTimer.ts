@@ -27,11 +27,13 @@ export interface MatchState {
   extensionsUsed: Record<PlayerId, number>;
   totalExtensionsUsed: Record<PlayerId, number>;
   totalFouls: Record<PlayerId, number>;
+  totalOtherFouls: Record<PlayerId, number>;
   score: Record<PlayerId, number>;
   gamesLog: GameLogEntry[];
   shotLog: ShotRecord[];
   isRunning: boolean;
   isExpired: boolean;
+  foulReason: 'time' | 'manual' | null;
   isMatchTimeExpired: boolean;
   isGameTimeExpired: boolean;
 }
@@ -45,6 +47,10 @@ interface Callbacks {
 const TICK_MS = 100;
 const WARNING_THRESHOLD_MS = 10_000;
 const FINAL_COUNTDOWN_SECONDS = 5;
+// Ball-in-hand bonus: after any foul (time-out or manually called), the
+// incoming player gets a few extra seconds on their next shot once they
+// switch in.
+const FOUL_SWITCH_BONUS_SECONDS = 5;
 
 function initialState(settings: Settings): MatchState {
   return {
@@ -60,11 +66,13 @@ function initialState(settings: Settings): MatchState {
     extensionsUsed: { 1: 0, 2: 0 },
     totalExtensionsUsed: { 1: 0, 2: 0 },
     totalFouls: { 1: 0, 2: 0 },
+    totalOtherFouls: { 1: 0, 2: 0 },
     score: { 1: 0, 2: 0 },
     gamesLog: [],
     shotLog: [],
     isRunning: false,
     isExpired: false,
+    foulReason: null,
     isMatchTimeExpired: false,
     isGameTimeExpired: false,
   };
@@ -129,6 +137,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           shotRemainingMs,
           shotElapsedMs: shotJustExpired ? 0 : shotElapsedMs,
           isExpired: prev.isExpired || shotJustExpired,
+          foulReason: shotJustExpired ? 'time' : prev.foulReason,
           isRunning: shotJustExpired ? false : prev.isRunning,
           totalFouls: shotJustExpired
             ? { ...prev.totalFouls, [prev.currentPlayer]: prev.totalFouls[prev.currentPlayer] + 1 }
@@ -213,6 +222,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
       shotElapsedMs: 0,
       shotLog: logShotIfNeeded(prev),
       isExpired: false,
+      foulReason: null,
       isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
       matchStarted: true,
     }));
@@ -221,17 +231,43 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
   const switchPlayer = useCallback(() => {
     warningFiredRef.current = false;
     lastTickSecondRef.current = null;
-    setState((prev) => ({
-      ...prev,
-      currentPlayer: prev.currentPlayer === 1 ? 2 : 1,
-      shotRemainingMs: settings.shotSeconds * 1000,
-      shotElapsedMs: 0,
-      shotLog: logShotIfNeeded(prev),
-      isExpired: false,
-      isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
-      matchStarted: true,
-    }));
+    setState((prev) => {
+      const foulBonusMs = prev.isExpired ? FOUL_SWITCH_BONUS_SECONDS * 1000 : 0;
+      return {
+        ...prev,
+        currentPlayer: prev.currentPlayer === 1 ? 2 : 1,
+        shotRemainingMs: settings.shotSeconds * 1000 + foulBonusMs,
+        shotElapsedMs: 0,
+        shotLog: logShotIfNeeded(prev),
+        isExpired: false,
+        foulReason: null,
+        isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
+        matchStarted: true,
+      };
+    });
   }, [settings.shotSeconds]);
+
+  // Manually calls a foul on the current player for a reason other than the
+  // shot clock running out (e.g. a rules violation) — has the same effect as
+  // a time-out foul (stops the clock, requires a new shot or a switch) but is
+  // tallied separately so it doesn't get confused with time-out fouls.
+  const callFoul = useCallback(() => {
+    setState((prev) => {
+      if (prev.isExpired) return prev;
+      callbacksRef.current.onBuzzer?.();
+      return {
+        ...prev,
+        isExpired: true,
+        foulReason: 'manual',
+        isRunning: false,
+        totalOtherFouls: {
+          ...prev.totalOtherFouls,
+          [prev.currentPlayer]: prev.totalOtherFouls[prev.currentPlayer] + 1,
+        },
+        shotLog: [...prev.shotLog, { player: prev.currentPlayer, durationMs: prev.shotElapsedMs }],
+      };
+    });
+  }, []);
 
   const useExtension = useCallback(() => {
     setState((prev) => {
@@ -270,11 +306,12 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         isGameTimeExpired: false,
         extensionsUsed: { 1: 0, 2: 0 },
         isExpired: false,
+        foulReason: null,
         isRunning: false,
       }));
     },
     [settings.shotSeconds, settings.totalGameEnabled, settings.totalGameMinutes]
   );
 
-  return { state, toggleRunning, newShot, switchPlayer, useExtension, endGame };
+  return { state, toggleRunning, newShot, switchPlayer, useExtension, endGame, callFoul };
 }

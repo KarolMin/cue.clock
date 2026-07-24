@@ -35,7 +35,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   const isLandscape = width > height;
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { playWarning, playBuzzer, playTick } = useShotClockSounds();
-  const { state, toggleRunning, newShot, switchPlayer, useExtension, endGame } = useMatchTimer(
+  const { state, toggleRunning, newShot, switchPlayer, useExtension, endGame, callFoul } = useMatchTimer(
     settings,
     { onWarning: playWarning, onTick: playTick, onBuzzer: playBuzzer }
   );
@@ -129,8 +129,13 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
         p1: String(state.totalFouls[1]),
         p2: String(state.totalFouls[2]),
       },
+      {
+        label: 'Inne faule',
+        p1: String(state.totalOtherFouls[1]),
+        p2: String(state.totalOtherFouls[2]),
+      },
     ],
-    [shotStats, state.totalExtensionsUsed, state.totalFouls]
+    [shotStats, state.totalExtensionsUsed, state.totalFouls, state.totalOtherFouls]
   );
 
   const headerBlock = (
@@ -181,7 +186,11 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
       <Text style={[styles.clock, { color: clockColor, fontSize: clockFontSize }]}>
         {formatShotSeconds(state.shotRemainingMs)}
       </Text>
-      {state.isExpired && <Text style={styles.expiredLabel}>CZAS! Faul</Text>}
+      {state.isExpired && (
+        <Text style={styles.expiredLabel}>
+          {state.foulReason === 'manual' ? 'FAUL' : 'CZAS! Faul'}
+        </Text>
+      )}
     </View>
   );
 
@@ -238,6 +247,20 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   );
 
   const timeExpired = state.isExpired || state.isMatchTimeExpired || state.isGameTimeExpired;
+
+  const foulButton = (
+    <Pressable
+      style={[styles.secondaryButton, timeExpired ? styles.foulButtonDisabled : styles.foulButtonHighlighted]}
+      onPress={callFoul}
+      disabled={timeExpired}
+    >
+      <Ionicons name="warning" size={18} color={timeExpired ? colors.disabledText : colors.danger} />
+      <Text style={[styles.secondaryButtonText, { color: timeExpired ? colors.disabledText : colors.danger }]}>
+        Faul
+      </Text>
+    </Pressable>
+  );
+
   const startPauseButton = (
     <Pressable
       style={[styles.primaryButton, timeExpired && styles.primaryButtonDisabled]}
@@ -276,6 +299,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           <View style={styles.landscapeButtonsRow}>
             {newShotButton}
             {switchPlayerButton}
+            {foulButton}
             {startPauseButton}
             {endGameButtonEl}
           </View>
@@ -295,6 +319,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           <View style={styles.secondaryRow}>
             {newShotButton}
             {switchPlayerButton}
+            {foulButton}
           </View>
 
           <View style={styles.primaryRow}>
@@ -632,6 +657,12 @@ function createStyles(colors: ThemeColors) {
     secondaryButtonTextHighlighted: {
       color: colors.accent,
       fontWeight: '700',
+    },
+    foulButtonHighlighted: {
+      borderColor: colors.danger,
+    },
+    foulButtonDisabled: {
+      borderColor: colors.disabledSurface,
     },
     modalTitle: {
       color: colors.text,
