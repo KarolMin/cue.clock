@@ -186,11 +186,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
       <Text style={[styles.clock, { color: clockColor, fontSize: clockFontSize }]}>
         {formatShotSeconds(state.shotRemainingMs)}
       </Text>
-      {state.isExpired && (
-        <Text style={styles.expiredLabel}>
-          {state.foulReason === 'manual' ? 'FAUL' : 'CZAS! Faul'}
-        </Text>
-      )}
+      {state.isExpired && <Text style={styles.expiredLabel}>CZAS! Faul</Text>}
     </View>
   );
 

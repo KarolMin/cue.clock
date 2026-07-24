@@ -33,7 +33,6 @@ export interface MatchState {
   shotLog: ShotRecord[];
   isRunning: boolean;
   isExpired: boolean;
-  foulReason: 'time' | 'manual' | null;
   isMatchTimeExpired: boolean;
   isGameTimeExpired: boolean;
 }
@@ -72,7 +71,6 @@ function initialState(settings: Settings): MatchState {
     shotLog: [],
     isRunning: false,
     isExpired: false,
-    foulReason: null,
     isMatchTimeExpired: false,
     isGameTimeExpired: false,
   };
@@ -137,7 +135,6 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           shotRemainingMs,
           shotElapsedMs: shotJustExpired ? 0 : shotElapsedMs,
           isExpired: prev.isExpired || shotJustExpired,
-          foulReason: shotJustExpired ? 'time' : prev.foulReason,
           isRunning: shotJustExpired ? false : prev.isRunning,
           totalFouls: shotJustExpired
             ? { ...prev.totalFouls, [prev.currentPlayer]: prev.totalFouls[prev.currentPlayer] + 1 }
@@ -222,7 +219,6 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
       shotElapsedMs: 0,
       shotLog: logShotIfNeeded(prev),
       isExpired: false,
-      foulReason: null,
       isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
       matchStarted: true,
     }));
@@ -240,7 +236,6 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         shotElapsedMs: 0,
         shotLog: logShotIfNeeded(prev),
         isExpired: false,
-        foulReason: null,
         isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
         matchStarted: true,
       };
@@ -248,26 +243,32 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
   }, [settings.shotSeconds]);
 
   // Manually calls a foul on the current player for a reason other than the
-  // shot clock running out (e.g. a rules violation) — has the same effect as
-  // a time-out foul (stops the clock, requires a new shot or a switch) but is
-  // tallied separately so it doesn't get confused with time-out fouls.
+  // shot clock running out (e.g. a rules violation) — tallied separately from
+  // time-out fouls. Immediately switches to the other player and starts
+  // their shot (with the ball-in-hand bonus), the same way switchPlayer does
+  // after a time-out foul, instead of waiting for a separate manual switch.
   const callFoul = useCallback(() => {
+    warningFiredRef.current = false;
+    lastTickSecondRef.current = null;
     setState((prev) => {
       if (prev.isExpired) return prev;
       callbacksRef.current.onBuzzer?.();
       return {
         ...prev,
-        isExpired: true,
-        foulReason: 'manual',
-        isRunning: false,
+        currentPlayer: prev.currentPlayer === 1 ? 2 : 1,
+        shotRemainingMs: settings.shotSeconds * 1000 + FOUL_SWITCH_BONUS_SECONDS * 1000,
+        shotElapsedMs: 0,
+        shotLog: [...prev.shotLog, { player: prev.currentPlayer, durationMs: prev.shotElapsedMs }],
+        isExpired: false,
         totalOtherFouls: {
           ...prev.totalOtherFouls,
           [prev.currentPlayer]: prev.totalOtherFouls[prev.currentPlayer] + 1,
         },
-        shotLog: [...prev.shotLog, { player: prev.currentPlayer, durationMs: prev.shotElapsedMs }],
+        isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
+        matchStarted: true,
       };
     });
-  }, []);
+  }, [settings.shotSeconds]);
 
   const useExtension = useCallback(() => {
     setState((prev) => {
@@ -306,7 +307,6 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         isGameTimeExpired: false,
         extensionsUsed: { 1: 0, 2: 0 },
         isExpired: false,
-        foulReason: null,
         isRunning: false,
       }));
     },
