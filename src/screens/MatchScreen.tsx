@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useKeepAwake } from 'expo-keep-awake';
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { AppModal } from '../components/AppModal';
 import { PlayerPanel } from '../components/PlayerPanel';
@@ -8,7 +8,7 @@ import { StatsTable } from '../components/StatsTable';
 import { PlayerId, ShotRecord, useMatchTimer } from '../hooks/useMatchTimer';
 import { useShotClockSounds } from '../sound/useShotClockSounds';
 import { ThemeColors } from '../theme/colors';
-import { MAX_CONTENT_WIDTH } from '../theme/layout';
+import { MAX_CONTENT_WIDTH, MAX_CONTENT_WIDTH_LANDSCAPE } from '../theme/layout';
 import { useTheme } from '../theme/ThemeContext';
 import { Settings } from '../types/settings';
 import { formatMinutesSeconds, formatSecondsDecimal, formatShotSeconds } from '../utils/format';
@@ -31,7 +31,8 @@ const WARNING_THRESHOLD_MS = 10_000;
 export function MatchScreen({ settings, onEndMatch }: Props) {
   useKeepAwake();
   const { colors } = useTheme();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { playWarning, playBuzzer, playTick } = useShotClockSounds();
   const { state, toggleRunning, newShot, switchPlayer, useExtension, endGame } = useMatchTimer(
@@ -47,8 +48,18 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   const isLow = state.shotRemainingMs <= WARNING_THRESHOLD_MS;
   const currentPlayerColor = state.currentPlayer === 1 ? colors.player1 : colors.player2;
   const clockColor = state.isExpired ? colors.danger : isLow ? colors.warning : currentPlayerColor;
-  const contentWidth = Math.min(width, MAX_CONTENT_WIDTH) - 40;
-  const clockFontSize = Math.max(100, Math.min(200, contentWidth * 0.38));
+
+  // Landscape spreads a player panel either side of the clock, so the clock's
+  // own column is narrower than the full screen — and the screen is shorter,
+  // so the font must also respect the available height.
+  const landscapeWidth = Math.min(width, MAX_CONTENT_WIDTH_LANDSCAPE);
+  const sidePanelWidth = Math.min(260, landscapeWidth * 0.28);
+  const contentWidth = isLandscape
+    ? landscapeWidth - sidePanelWidth * 2 - 88
+    : Math.min(width, MAX_CONTENT_WIDTH) - 40;
+  const clockFontSize = isLandscape
+    ? Math.max(80, Math.min(220, contentWidth * 0.4, height * 0.46))
+    : Math.max(100, Math.min(200, contentWidth * 0.38));
 
   const handlePickWinner = (winner: PlayerId) => {
     const newScore = state.score[winner] + 1;
@@ -122,127 +133,176 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
     [shotStats, state.totalExtensionsUsed, state.totalFouls]
   );
 
+  const headerBlock = (
+    <View style={styles.header}>
+      <Text style={styles.gameLabel}>Partia {state.gameNumber}</Text>
+      <Pressable style={styles.endButton} onPress={() => setShowMatchSummary(true)}>
+        <Ionicons name="power" size={12} color={colors.warningText} />
+        <Text style={styles.endButtonText}>Zakończ mecz</Text>
+      </Pressable>
+    </View>
+  );
+
+  const scoreBlock = (
+    <Fragment>
+      <Text style={styles.scoreRow} numberOfLines={1}>
+        {settings.player1Name}{' '}
+        <Text style={{ color: colors.player1 }}>{state.score[1]}</Text> :{' '}
+        <Text style={{ color: colors.player2 }}>{state.score[2]}</Text> {settings.player2Name}
+      </Text>
+      {settings.raceToGames > 0 && (
+        <Text style={styles.raceHint}>Grane do {settings.raceToGames} wygranych</Text>
+      )}
+
+      <View style={styles.elapsedRow}>
+        <Text style={styles.elapsedTime}>Czas partii: {formatMinutesSeconds(state.gameElapsedMs)}</Text>
+        <Text style={styles.elapsedTime}>Czas meczu: {formatMinutesSeconds(state.matchElapsedMs)}</Text>
+      </View>
+
+      {(state.totalGameRemainingMs !== null || state.totalRemainingMs !== null) && (
+        <View style={styles.totalRow}>
+          {state.totalGameRemainingMs !== null && (
+            <Text style={[styles.totalTime, state.isGameTimeExpired && styles.totalTimeExpired]}>
+              Pozostały czas partii: {formatMinutesSeconds(state.totalGameRemainingMs)}
+            </Text>
+          )}
+          {state.totalRemainingMs !== null && (
+            <Text style={[styles.totalTime, state.isMatchTimeExpired && styles.totalTimeExpired]}>
+              Pozostały czas meczu: {formatMinutesSeconds(state.totalRemainingMs)}
+            </Text>
+          )}
+        </View>
+      )}
+    </Fragment>
+  );
+
+  const clockBlock = (
+    <View style={styles.clockWrap}>
+      <Text style={[styles.clock, { color: clockColor, fontSize: clockFontSize }]}>
+        {formatShotSeconds(state.shotRemainingMs)}
+      </Text>
+      {state.isExpired && <Text style={styles.expiredLabel}>CZAS! Faul</Text>}
+    </View>
+  );
+
+  const player1Panel = (
+    <PlayerPanel
+      name={settings.player1Name}
+      accentColor={colors.player1}
+      isActive={state.currentPlayer === 1}
+      extensionsUsed={state.extensionsUsed[1]}
+      extensionsPerGame={settings.extensionsPerGame}
+      canUseExtension={
+        state.currentPlayer === 1 &&
+        !state.isExpired &&
+        state.extensionsUsed[1] < settings.extensionsPerGame
+      }
+      onUseExtension={useExtension}
+      onPressPlayer={() => (state.currentPlayer === 1 ? newShot() : switchPlayer())}
+    />
+  );
+
+  const player2Panel = (
+    <PlayerPanel
+      name={settings.player2Name}
+      accentColor={colors.player2}
+      isActive={state.currentPlayer === 2}
+      extensionsUsed={state.extensionsUsed[2]}
+      extensionsPerGame={settings.extensionsPerGame}
+      canUseExtension={
+        state.currentPlayer === 2 &&
+        !state.isExpired &&
+        state.extensionsUsed[2] < settings.extensionsPerGame
+      }
+      onUseExtension={useExtension}
+      onPressPlayer={() => (state.currentPlayer === 2 ? newShot() : switchPlayer())}
+    />
+  );
+
+  const newShotButton = (
+    <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={newShot}>
+      <Ionicons name="refresh" size={18} color={colors.accent} />
+      <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
+        Nowe uderzenie
+      </Text>
+    </Pressable>
+  );
+
+  const switchPlayerButton = (
+    <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={switchPlayer}>
+      <Ionicons name="swap-horizontal" size={18} color={colors.accent} />
+      <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
+        Zmiana zawodnika
+      </Text>
+    </Pressable>
+  );
+
+  const timeExpired = state.isExpired || state.isMatchTimeExpired || state.isGameTimeExpired;
+  const startPauseButton = (
+    <Pressable
+      style={[styles.primaryButton, timeExpired && styles.primaryButtonDisabled]}
+      onPress={toggleRunning}
+      disabled={timeExpired}
+    >
+      <Ionicons
+        name={state.isRunning ? 'pause' : 'play'}
+        size={18}
+        color={timeExpired ? colors.disabledText : colors.accentText}
+      />
+      <Text style={styles.primaryButtonText}>{state.isRunning ? 'Pauza' : 'Start'}</Text>
+    </Pressable>
+  );
+
+  const endGameButtonEl = (
+    <Pressable style={styles.endGameButton} onPress={() => setPickingWinner(true)}>
+      <Ionicons name="flag" size={16} color={colors.text} />
+      <Text style={styles.endGameButtonText}>Zakończ partię</Text>
+    </Pressable>
+  );
+
   return (
     <View style={styles.outer}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.gameLabel}>Partia {state.gameNumber}</Text>
-          <Pressable style={styles.endButton} onPress={() => setShowMatchSummary(true)}>
-            <Ionicons name="power" size={12} color={colors.warningText} />
-            <Text style={styles.endButtonText}>Zakończ mecz</Text>
-          </Pressable>
-        </View>
-
-        <Text style={styles.scoreRow} numberOfLines={1}>
-          {settings.player1Name}{' '}
-          <Text style={{ color: colors.player1 }}>{state.score[1]}</Text> :{' '}
-          <Text style={{ color: colors.player2 }}>{state.score[2]}</Text> {settings.player2Name}
-        </Text>
-        {settings.raceToGames > 0 && (
-          <Text style={styles.raceHint}>Grane do {settings.raceToGames} wygranych</Text>
-        )}
-
-        <View style={styles.elapsedRow}>
-          <Text style={styles.elapsedTime}>Czas partii: {formatMinutesSeconds(state.gameElapsedMs)}</Text>
-          <Text style={styles.elapsedTime}>Czas meczu: {formatMinutesSeconds(state.matchElapsedMs)}</Text>
-        </View>
-
-        {(state.totalGameRemainingMs !== null || state.totalRemainingMs !== null) && (
-          <View style={styles.totalRow}>
-            {state.totalGameRemainingMs !== null && (
-              <Text style={[styles.totalTime, state.isGameTimeExpired && styles.totalTimeExpired]}>
-                Pozostały czas partii: {formatMinutesSeconds(state.totalGameRemainingMs)}
-              </Text>
-            )}
-            {state.totalRemainingMs !== null && (
-              <Text style={[styles.totalTime, state.isMatchTimeExpired && styles.totalTimeExpired]}>
-                Pozostały czas meczu: {formatMinutesSeconds(state.totalRemainingMs)}
-              </Text>
-            )}
+      {isLandscape ? (
+        <View style={styles.landscapeContainer}>
+          {headerBlock}
+          <View style={styles.landscapeMiddle}>
+            <View style={styles.landscapeSide}>{player1Panel}</View>
+            <View style={styles.landscapeCenter}>
+              {scoreBlock}
+              {clockBlock}
+            </View>
+            <View style={styles.landscapeSide}>{player2Panel}</View>
           </View>
-        )}
-
-        <View style={styles.clockWrap}>
-          <Text style={[styles.clock, { color: clockColor, fontSize: clockFontSize }]}>
-            {formatShotSeconds(state.shotRemainingMs)}
-          </Text>
-          {state.isExpired && <Text style={styles.expiredLabel}>CZAS! Faul</Text>}
+          <View style={styles.landscapeButtonsRow}>
+            {newShotButton}
+            {switchPlayerButton}
+            {startPauseButton}
+            {endGameButtonEl}
+          </View>
         </View>
+      ) : (
+        <View style={styles.container}>
+          {headerBlock}
+          {scoreBlock}
+          {clockBlock}
 
-        <View style={styles.playersRow}>
-          <PlayerPanel
-            name={settings.player1Name}
-            accentColor={colors.player1}
-            isActive={state.currentPlayer === 1}
-            extensionsUsed={state.extensionsUsed[1]}
-            extensionsPerGame={settings.extensionsPerGame}
-            canUseExtension={
-              state.currentPlayer === 1 &&
-              !state.isExpired &&
-              state.extensionsUsed[1] < settings.extensionsPerGame
-            }
-            onUseExtension={useExtension}
-            onPressPlayer={() => (state.currentPlayer === 1 ? newShot() : switchPlayer())}
-          />
-          <View style={styles.playersGap} />
-          <PlayerPanel
-            name={settings.player2Name}
-            accentColor={colors.player2}
-            isActive={state.currentPlayer === 2}
-            extensionsUsed={state.extensionsUsed[2]}
-            extensionsPerGame={settings.extensionsPerGame}
-            canUseExtension={
-              state.currentPlayer === 2 &&
-              !state.isExpired &&
-              state.extensionsUsed[2] < settings.extensionsPerGame
-            }
-            onUseExtension={useExtension}
-            onPressPlayer={() => (state.currentPlayer === 2 ? newShot() : switchPlayer())}
-          />
-        </View>
+          <View style={styles.playersRow}>
+            {player1Panel}
+            <View style={styles.playersGap} />
+            {player2Panel}
+          </View>
 
-        <View style={styles.secondaryRow}>
-          <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={newShot}>
-            <Ionicons name="refresh" size={18} color={colors.accent} />
-            <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
-              Nowe uderzenie
-            </Text>
-          </Pressable>
-          <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={switchPlayer}>
-            <Ionicons name="swap-horizontal" size={18} color={colors.accent} />
-            <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
-              Zmiana zawodnika
-            </Text>
-          </Pressable>
-        </View>
+          <View style={styles.secondaryRow}>
+            {newShotButton}
+            {switchPlayerButton}
+          </View>
 
-        <View style={styles.primaryRow}>
-          <Pressable
-            style={[
-              styles.primaryButton,
-              (state.isExpired || state.isMatchTimeExpired || state.isGameTimeExpired) &&
-                styles.primaryButtonDisabled,
-            ]}
-            onPress={toggleRunning}
-            disabled={state.isExpired || state.isMatchTimeExpired || state.isGameTimeExpired}
-          >
-            <Ionicons
-              name={state.isRunning ? 'pause' : 'play'}
-              size={18}
-              color={
-                state.isExpired || state.isMatchTimeExpired || state.isGameTimeExpired
-                  ? colors.disabledText
-                  : colors.accentText
-              }
-            />
-            <Text style={styles.primaryButtonText}>{state.isRunning ? 'Pauza' : 'Start'}</Text>
-          </Pressable>
-          <Pressable style={styles.endGameButton} onPress={() => setPickingWinner(true)}>
-            <Ionicons name="flag" size={16} color={colors.text} />
-            <Text style={styles.endGameButtonText}>Zakończ partię</Text>
-          </Pressable>
+          <View style={styles.primaryRow}>
+            {startPauseButton}
+            {endGameButtonEl}
+          </View>
         </View>
-      </View>
+      )}
 
       <AppModal visible={pickingWinner}>
         <Text style={styles.modalTitle}>Kto wygrał partię {state.gameNumber}?</Text>
@@ -394,6 +454,34 @@ function createStyles(colors: ThemeColors) {
       maxWidth: MAX_CONTENT_WIDTH,
       padding: 20,
       paddingTop: 60,
+    },
+    landscapeContainer: {
+      flex: 1,
+      width: '100%',
+      maxWidth: MAX_CONTENT_WIDTH_LANDSCAPE,
+      paddingHorizontal: 28,
+      paddingTop: 16,
+      paddingBottom: 16,
+    },
+    landscapeMiddle: {
+      flex: 1,
+      flexDirection: 'row',
+      gap: 16,
+    },
+    landscapeSide: {
+      flex: 1,
+      alignSelf: 'center',
+      justifyContent: 'center',
+    },
+    landscapeCenter: {
+      flex: 1.3,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    landscapeButtonsRow: {
+      flexDirection: 'row',
+      marginHorizontal: -4,
+      marginTop: 8,
     },
     header: {
       flexDirection: 'row',
