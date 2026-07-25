@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { NumberStepper } from '../components/NumberStepper';
 import { PlayerNameField } from '../components/PlayerNameField';
+import { useTranslation } from '../i18n/LanguageContext';
+import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../i18n/languages';
 import { loadRecentNames, rememberName } from '../storage/recentNamesStorage';
 import { ThemeColors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
@@ -28,6 +30,7 @@ interface Props {
 
 export function SettingsScreen({ settings, onChange, onStart }: Props) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [player1Name, setPlayer1Name] = useState(settings.player1Name);
   const [player2Name, setPlayer2Name] = useState(settings.player2Name);
@@ -39,12 +42,14 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
 
   const update = (patch: Partial<Settings>) => onChange({ ...settings, ...patch });
 
+  const defaultNames = [t('settingsPlayer1Placeholder'), t('settingsPlayer2Placeholder')];
+
   const commitNames = async () => {
-    const p1 = player1Name.trim() || 'Gracz 1';
-    const p2 = player2Name.trim() || 'Gracz 2';
+    const p1 = player1Name.trim() || t('settingsPlayer1Placeholder');
+    const p2 = player2Name.trim() || t('settingsPlayer2Placeholder');
     update({ player1Name: p1, player2Name: p2 });
-    await rememberName(p1);
-    setRecentNames(await rememberName(p2));
+    await rememberName(p1, defaultNames);
+    setRecentNames(await rememberName(p2, defaultNames));
   };
 
   const pickName = (which: 1 | 2, name: string) => {
@@ -55,7 +60,7 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
       setPlayer2Name(name);
       update({ player2Name: name });
     }
-    rememberName(name).then(setRecentNames);
+    rememberName(name, defaultNames).then(setRecentNames);
   };
 
   const suggestionsFor = (currentValue: string, otherValue: string) =>
@@ -72,22 +77,23 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             <Image source={require('../../assets/app-logo.png')} style={styles.titleLogo} />
             <Text style={styles.title}>cue.clock</Text>
           </View>
-          <Text style={styles.subtitle}>Zegar 4 fun.</Text>
+          <Text style={styles.subtitle}>{t('settingsSubtitle')}</Text>
           <Pressable
             style={styles.tutorialLink}
             onPress={() => Linking.openURL('https://cueclock.online/tutorial.mp4')}
           >
             <Ionicons name="play-circle" size={16} color={colors.accent} />
-            <Text style={styles.tutorialLinkText}>Zobacz samouczek (wideo)</Text>
+            <Text style={styles.tutorialLinkText}>{t('settingsTutorialLink')}</Text>
           </Pressable>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Zawodnicy</Text>
+            <Text style={styles.sectionTitle}>{t('settingsPlayersSectionTitle')}</Text>
+            <Text style={styles.sectionHint}>{t('settingsPlayersHint')}</Text>
             <PlayerNameField
               value={player1Name}
               onChangeText={setPlayer1Name}
               onCommit={commitNames}
-              placeholder="Gracz 1"
+              placeholder={t('settingsPlayer1Placeholder')}
               suggestions={suggestionsFor(player1Name, player2Name)}
               onPickSuggestion={(name) => pickName(1, name)}
             />
@@ -95,16 +101,16 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
               value={player2Name}
               onChangeText={setPlayer2Name}
               onCommit={commitNames}
-              placeholder="Gracz 2"
+              placeholder={t('settingsPlayer2Placeholder')}
               suggestions={suggestionsFor(player2Name, player1Name)}
               onPickSuggestion={(name) => pickName(2, name)}
             />
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Zegar uderzenia</Text>
+            <Text style={styles.sectionTitle}>{t('settingsShotClockSectionTitle')}</Text>
             <NumberStepper
-              label="Czas na uderzenie"
+              label={t('settingsShotSecondsLabel')}
               value={settings.shotSeconds}
               onChange={(v) => update({ shotSeconds: v })}
               min={LIMITS.shotSeconds.min}
@@ -113,7 +119,7 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
               unit="s"
             />
             <NumberStepper
-              label="Czas przedłużenia"
+              label={t('settingsExtensionSecondsLabel')}
               value={settings.extensionSeconds}
               onChange={(v) => update({ extensionSeconds: v })}
               min={LIMITS.extensionSeconds.min}
@@ -122,7 +128,7 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
               unit="s"
             />
             <NumberStepper
-              label="Przedłużeń na partię (gracz)"
+              label={t('settingsExtensionsPerGameLabel')}
               value={settings.extensionsPerGame}
               onChange={(v) => update({ extensionsPerGame: v })}
               min={LIMITS.extensionsPerGame.min}
@@ -131,9 +137,9 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Format meczu</Text>
+            <Text style={styles.sectionTitle}>{t('settingsMatchFormatSectionTitle')}</Text>
             <NumberStepper
-              label="Mecz do X wygranych partii"
+              label={t('settingsRaceToGamesLabel')}
               value={settings.raceToGames}
               onChange={(v) => update({ raceToGames: v })}
               min={LIMITS.raceToGames.min}
@@ -141,14 +147,14 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             />
             <Text style={styles.helperText}>
               {settings.raceToGames === 0
-                ? 'Bez limitu — mecz kończysz ręcznie w dowolnym momencie.'
-                : `Po ${settings.raceToGames} wygranych partiach zobaczysz podsumowanie meczu.`}
+                ? t('settingsRaceHintUnlimited')
+                : t('settingsRaceHintLimited', { n: settings.raceToGames })}
             </Text>
           </View>
 
           <View style={styles.section}>
             <View style={styles.switchRow}>
-              <Text style={styles.sectionTitle}>Łączny czas meczu</Text>
+              <Text style={styles.sectionTitle}>{t('settingsTotalMatchSectionTitle')}</Text>
               <Switch
                 value={settings.totalMatchEnabled}
                 onValueChange={(v) => update({ totalMatchEnabled: v })}
@@ -158,7 +164,7 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             </View>
             {settings.totalMatchEnabled && (
               <NumberStepper
-                label="Czas meczu"
+                label={t('settingsTotalMatchTimeLabel')}
                 value={settings.totalMatchMinutes}
                 onChange={(v) => update({ totalMatchMinutes: v })}
                 min={LIMITS.totalMatchMinutes.min}
@@ -171,7 +177,7 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
 
           <View style={styles.section}>
             <View style={styles.switchRow}>
-              <Text style={styles.sectionTitle}>Maksymalny czas partii</Text>
+              <Text style={styles.sectionTitle}>{t('settingsTotalGameSectionTitle')}</Text>
               <Switch
                 value={settings.totalGameEnabled}
                 onValueChange={(v) => update({ totalGameEnabled: v })}
@@ -181,7 +187,7 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             </View>
             {settings.totalGameEnabled && (
               <NumberStepper
-                label="Czas partii"
+                label={t('settingsTotalGameTimeLabel')}
                 value={settings.totalGameMinutes}
                 onChange={(v) => update({ totalGameMinutes: v })}
                 min={LIMITS.totalGameMinutes.min}
@@ -192,8 +198,28 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             )}
           </View>
 
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('settingsLanguageSectionTitle')}</Text>
+            <View style={styles.languageRow}>
+              {SUPPORTED_LANGUAGES.map((code) => {
+                const active = settings.language === code;
+                return (
+                  <Pressable
+                    key={code}
+                    style={[styles.languageChip, active && styles.languageChipActive]}
+                    onPress={() => update({ language: code })}
+                  >
+                    <Text style={[styles.languageChipText, active && styles.languageChipTextActive]}>
+                      {LANGUAGE_LABELS[code]}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
           <Pressable style={styles.startButton} onPress={onStart}>
-            <Text style={styles.startButtonText}>Rozpocznij mecz</Text>
+            <Text style={styles.startButtonText}>{t('settingsStartButton')}</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -262,6 +288,11 @@ function createStyles(colors: ThemeColors) {
       fontWeight: '700',
       marginBottom: 4,
     },
+    sectionHint: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      marginBottom: 4,
+    },
     switchRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -271,6 +302,33 @@ function createStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       fontSize: 12,
       marginTop: 4,
+    },
+    languageRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginTop: 8,
+    },
+    languageChip: {
+      backgroundColor: colors.controlSurface,
+      borderRadius: 999,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderWidth: 2,
+      borderColor: 'transparent',
+    },
+    languageChipActive: {
+      backgroundColor: `${colors.accent}22`,
+      borderColor: colors.accent,
+    },
+    languageChipText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    languageChipTextActive: {
+      color: colors.accent,
+      fontWeight: '700',
     },
     startButton: {
       backgroundColor: colors.accent,

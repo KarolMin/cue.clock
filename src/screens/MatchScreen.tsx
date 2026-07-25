@@ -6,6 +6,7 @@ import { AppModal } from '../components/AppModal';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { StatsTable } from '../components/StatsTable';
 import { PlayerId, ShotRecord, useMatchTimer } from '../hooks/useMatchTimer';
+import { useTranslation } from '../i18n/LanguageContext';
 import { useShotClockSounds } from '../sound/useShotClockSounds';
 import { ThemeColors } from '../theme/colors';
 import { MAX_CONTENT_WIDTH, MAX_CONTENT_WIDTH_LANDSCAPE } from '../theme/layout';
@@ -31,6 +32,7 @@ const WARNING_THRESHOLD_MS = 10_000;
 export function MatchScreen({ settings, onEndMatch }: Props) {
   useKeepAwake();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -95,55 +97,55 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   const summaryRows = useMemo(
     () => [
       {
-        label: 'Liczba uderzeń',
+        label: t('statShots'),
         p1: String(shotStats[1].count),
         p2: String(shotStats[2].count),
       },
       {
-        label: 'Łączny czas gry',
+        label: t('statTotalTime'),
         p1: formatMinutesSeconds(shotStats[1].totalMs),
         p2: formatMinutesSeconds(shotStats[2].totalMs),
       },
       {
-        label: 'Średni czas uderzenia',
+        label: t('statAvgShot'),
         p1: shotStats[1].count > 0 ? formatSecondsDecimal(shotStats[1].totalMs / shotStats[1].count) : '—',
         p2: shotStats[2].count > 0 ? formatSecondsDecimal(shotStats[2].totalMs / shotStats[2].count) : '—',
       },
       {
-        label: 'Najszybsze uderzenie',
+        label: t('statFastestShot'),
         p1: shotStats[1].fastestMs !== null ? formatSecondsDecimal(shotStats[1].fastestMs) : '—',
         p2: shotStats[2].fastestMs !== null ? formatSecondsDecimal(shotStats[2].fastestMs) : '—',
       },
       {
-        label: 'Najdłuższe uderzenie',
+        label: t('statLongestShot'),
         p1: shotStats[1].longestMs !== null ? formatSecondsDecimal(shotStats[1].longestMs) : '—',
         p2: shotStats[2].longestMs !== null ? formatSecondsDecimal(shotStats[2].longestMs) : '—',
       },
       {
-        label: 'Przedłużenia łącznie',
+        label: t('statExtensionsTotal'),
         p1: String(state.totalExtensionsUsed[1]),
         p2: String(state.totalExtensionsUsed[2]),
       },
       {
-        label: 'Przekroczenia czasu',
+        label: t('statTimeouts'),
         p1: String(state.totalFouls[1]),
         p2: String(state.totalFouls[2]),
       },
       {
-        label: 'Inne faule',
+        label: t('statOtherFouls'),
         p1: String(state.totalOtherFouls[1]),
         p2: String(state.totalOtherFouls[2]),
       },
     ],
-    [shotStats, state.totalExtensionsUsed, state.totalFouls, state.totalOtherFouls]
+    [t, shotStats, state.totalExtensionsUsed, state.totalFouls, state.totalOtherFouls]
   );
 
   const headerBlock = (
     <View style={styles.header}>
-      <Text style={styles.gameLabel}>Partia {state.gameNumber}</Text>
+      <Text style={styles.gameLabel}>{t('matchGameLabel', { n: state.gameNumber })}</Text>
       <Pressable style={styles.endButton} onPress={() => setShowMatchSummary(true)}>
         <Ionicons name="power" size={12} color={colors.warningText} />
-        <Text style={styles.endButtonText}>Zakończ mecz</Text>
+        <Text style={styles.endButtonText}>{t('matchEndMatchButton')}</Text>
       </Pressable>
     </View>
   );
@@ -156,24 +158,28 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
         <Text style={{ color: colors.player2 }}>{state.score[2]}</Text> {settings.player2Name}
       </Text>
       {settings.raceToGames > 0 && (
-        <Text style={styles.raceHint}>Grane do {settings.raceToGames} wygranych</Text>
+        <Text style={styles.raceHint}>{t('matchRaceHintPlaying', { n: settings.raceToGames })}</Text>
       )}
 
       <View style={styles.elapsedRow}>
-        <Text style={styles.elapsedTime}>Czas partii: {formatMinutesSeconds(state.gameElapsedMs)}</Text>
-        <Text style={styles.elapsedTime}>Czas meczu: {formatMinutesSeconds(state.matchElapsedMs)}</Text>
+        <Text style={styles.elapsedTime}>
+          {t('matchGameTimeElapsed', { time: formatMinutesSeconds(state.gameElapsedMs) })}
+        </Text>
+        <Text style={styles.elapsedTime}>
+          {t('matchTimeElapsed', { time: formatMinutesSeconds(state.matchElapsedMs) })}
+        </Text>
       </View>
 
       {(state.totalGameRemainingMs !== null || state.totalRemainingMs !== null) && (
         <View style={styles.totalRow}>
           {state.totalGameRemainingMs !== null && (
             <Text style={[styles.totalTime, state.isGameTimeExpired && styles.totalTimeExpired]}>
-              Pozostały czas partii: {formatMinutesSeconds(state.totalGameRemainingMs)}
+              {t('matchGameTimeRemaining', { time: formatMinutesSeconds(state.totalGameRemainingMs) })}
             </Text>
           )}
           {state.totalRemainingMs !== null && (
             <Text style={[styles.totalTime, state.isMatchTimeExpired && styles.totalTimeExpired]}>
-              Pozostały czas meczu: {formatMinutesSeconds(state.totalRemainingMs)}
+              {t('matchTimeRemaining', { time: formatMinutesSeconds(state.totalRemainingMs) })}
             </Text>
           )}
         </View>
@@ -186,7 +192,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
       <Text style={[styles.clock, { color: clockColor, fontSize: clockFontSize }]}>
         {formatShotSeconds(state.shotRemainingMs)}
       </Text>
-      {state.isExpired && <Text style={styles.expiredLabel}>CZAS! Faul</Text>}
+      {state.isExpired && <Text style={styles.expiredLabel}>{t('matchFoulLabel')}</Text>}
     </View>
   );
 
@@ -224,24 +230,6 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
     />
   );
 
-  const newShotButton = (
-    <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={newShot}>
-      <Ionicons name="refresh" size={18} color={colors.accent} />
-      <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
-        Nowe uderzenie
-      </Text>
-    </Pressable>
-  );
-
-  const switchPlayerButton = (
-    <Pressable style={[styles.secondaryButton, styles.secondaryButtonHighlighted]} onPress={switchPlayer}>
-      <Ionicons name="swap-horizontal" size={18} color={colors.accent} />
-      <Text style={[styles.secondaryButtonText, styles.secondaryButtonTextHighlighted]}>
-        Zmiana zawodnika
-      </Text>
-    </Pressable>
-  );
-
   const timeExpired = state.isExpired || state.isMatchTimeExpired || state.isGameTimeExpired;
 
   const foulButton = (
@@ -252,7 +240,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
     >
       <Ionicons name="warning" size={18} color={timeExpired ? colors.disabledText : colors.danger} />
       <Text style={[styles.secondaryButtonText, { color: timeExpired ? colors.disabledText : colors.danger }]}>
-        Faul
+        {t('matchFoulButton')}
       </Text>
     </Pressable>
   );
@@ -268,14 +256,16 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
         size={18}
         color={timeExpired ? colors.disabledText : colors.accentText}
       />
-      <Text style={styles.primaryButtonText}>{state.isRunning ? 'Pauza' : 'Start'}</Text>
+      <Text style={styles.primaryButtonText}>
+        {state.isRunning ? t('matchPauseButton') : t('matchStartButton')}
+      </Text>
     </Pressable>
   );
 
   const endGameButtonEl = (
     <Pressable style={styles.endGameButton} onPress={() => setPickingWinner(true)}>
       <Ionicons name="flag" size={16} color={colors.text} />
-      <Text style={styles.endGameButtonText}>Zakończ partię</Text>
+      <Text style={styles.endGameButtonText}>{t('matchEndGameButton')}</Text>
     </Pressable>
   );
 
@@ -292,9 +282,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
             </View>
             <View style={styles.landscapeSide}>{player2Panel}</View>
           </View>
-          <View style={styles.landscapeButtonsRow}>
-            {newShotButton}
-            {switchPlayerButton}
+          <View style={styles.actionsRow}>
             {foulButton}
             {startPauseButton}
             {endGameButtonEl}
@@ -312,13 +300,8 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
             {player2Panel}
           </View>
 
-          <View style={styles.secondaryRow}>
-            {newShotButton}
-            {switchPlayerButton}
+          <View style={styles.actionsRow}>
             {foulButton}
-          </View>
-
-          <View style={styles.primaryRow}>
             {startPauseButton}
             {endGameButtonEl}
           </View>
@@ -326,7 +309,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
       )}
 
       <AppModal visible={pickingWinner}>
-        <Text style={styles.modalTitle}>Kto wygrał partię {state.gameNumber}?</Text>
+        <Text style={styles.modalTitle}>{t('matchPickWinnerTitle', { n: state.gameNumber })}</Text>
         <Pressable
           style={[styles.winnerButton, { backgroundColor: colors.player1 }]}
           onPress={() => handlePickWinner(1)}
@@ -340,7 +323,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           <Text style={styles.winnerButtonText}>{settings.player2Name}</Text>
         </Pressable>
         <Pressable style={styles.modalCancel} onPress={() => setPickingWinner(false)}>
-          <Text style={styles.modalCancelText}>Anuluj</Text>
+          <Text style={styles.modalCancelText}>{t('matchCancel')}</Text>
         </Pressable>
       </AppModal>
 
@@ -349,8 +332,8 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           <>
             <Text style={styles.modalTitle}>
               {gameSummary.matchWon
-                ? `${nameFor(gameSummary.winner)} wygrywa mecz!`
-                : `${nameFor(gameSummary.winner)} wygrywa partię ${gameSummary.gameNumber}!`}
+                ? t('matchWinsMatch', { name: nameFor(gameSummary.winner) })
+                : t('matchWinsGame', { name: nameFor(gameSummary.winner), n: gameSummary.gameNumber })}
             </Text>
             <Text style={styles.modalScore}>
               {settings.player1Name} {gameSummary.scoreAfter[1]} : {gameSummary.scoreAfter[2]}{' '}
@@ -358,8 +341,12 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
             </Text>
             <View style={styles.statsBlock}>
               <Text style={styles.statsRow}>
-                Przedłużenia w tej partii: {settings.player1Name} {gameSummary.extensionsUsed[1]} ·{' '}
-                {settings.player2Name} {gameSummary.extensionsUsed[2]}
+                {t('matchExtensionsThisGame', {
+                  p1: settings.player1Name,
+                  n1: gameSummary.extensionsUsed[1],
+                  p2: settings.player2Name,
+                  n2: gameSummary.extensionsUsed[2],
+                })}
               </Text>
             </View>
             <Pressable
@@ -370,7 +357,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
               }}
             >
               <Text style={styles.winnerButtonText}>
-                {gameSummary.matchWon ? 'Zobacz podsumowanie meczu' : 'Kontynuuj'}
+                {gameSummary.matchWon ? t('matchViewSummaryButton') : t('matchContinueButton')}
               </Text>
             </Pressable>
           </>
@@ -378,16 +365,18 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
       </AppModal>
 
       <AppModal visible={showMatchSummary}>
-        <Text style={styles.modalTitle}>Podsumowanie meczu</Text>
+        <Text style={styles.modalTitle}>{t('matchSummaryTitle')}</Text>
         <Text style={styles.modalScore}>
           {settings.player1Name} {state.score[1]} : {state.score[2]} {settings.player2Name}
         </Text>
         <Text style={styles.modalSubtitle}>
-          {matchWinner ? `Wygrywa ${nameFor(matchWinner)}` : 'Remis'}
+          {matchWinner ? t('matchWinsPlain', { name: nameFor(matchWinner) }) : t('matchDraw')}
         </Text>
         <View style={styles.statsBlock}>
-          <Text style={styles.statsRow}>Czas trwania meczu: {formatMinutesSeconds(state.matchElapsedMs)}</Text>
-          <Text style={styles.statsRow}>Rozegrane partie: {state.gamesLog.length}</Text>
+          <Text style={styles.statsRow}>
+            {t('matchDuration', { time: formatMinutesSeconds(state.matchElapsedMs) })}
+          </Text>
+          <Text style={styles.statsRow}>{t('matchGamesPlayed', { n: state.gamesLog.length })}</Text>
           <StatsTable
             player1Name={settings.player1Name}
             player2Name={settings.player2Name}
@@ -399,7 +388,7 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
             <View style={styles.gamesLogWrap}>
               {state.gamesLog.map((g) => (
                 <Text key={g.gameNumber} style={styles.gamesLogRow}>
-                  Partia {g.gameNumber}: {nameFor(g.winner)}
+                  {t('matchGameLogRow', { n: g.gameNumber, name: nameFor(g.winner) })}
                 </Text>
               ))}
             </View>
@@ -407,10 +396,10 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
         </View>
         <Pressable style={[styles.winnerButton, styles.endMatchButton]} onPress={handleRequestEndMatch}>
           <Ionicons name="power" size={16} color={colors.warningText} />
-          <Text style={[styles.winnerButtonText, styles.endMatchButtonText]}>Zakończ mecz</Text>
+          <Text style={[styles.winnerButtonText, styles.endMatchButtonText]}>{t('matchEndMatchButton')}</Text>
         </Pressable>
         <Pressable style={styles.modalCancel} onPress={() => setShowMatchSummary(false)}>
-          <Text style={styles.modalCancelText}>Wróć do meczu</Text>
+          <Text style={styles.modalCancelText}>{t('matchBackToMatch')}</Text>
         </Pressable>
       </AppModal>
 
@@ -421,19 +410,17 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
           color={colors.warning}
           style={{ alignSelf: 'center', marginBottom: 12 }}
         />
-        <Text style={styles.modalTitle}>Zakończyć mecz?</Text>
-        <Text style={styles.modalSubtitle}>
-          Wynik zostanie zapisany w podsumowaniu. Tej operacji nie można cofnąć.
-        </Text>
+        <Text style={styles.modalTitle}>{t('matchConfirmEndTitle')}</Text>
+        <Text style={styles.modalSubtitle}>{t('matchConfirmEndBody')}</Text>
         <Pressable
           style={[styles.winnerButton, styles.endMatchButton, { marginTop: 16 }]}
           onPress={handleConfirmEndMatch}
         >
           <Ionicons name="power" size={16} color={colors.warningText} />
-          <Text style={[styles.winnerButtonText, styles.endMatchButtonText]}>Tak, zakończ mecz</Text>
+          <Text style={[styles.winnerButtonText, styles.endMatchButtonText]}>{t('matchConfirmEndButton')}</Text>
         </Pressable>
         <Pressable style={styles.modalCancel} onPress={handleCancelEndMatch}>
-          <Text style={styles.modalCancelText}>Anuluj</Text>
+          <Text style={styles.modalCancelText}>{t('matchCancel')}</Text>
         </Pressable>
       </AppModal>
     </View>
@@ -498,11 +485,6 @@ function createStyles(colors: ThemeColors) {
       flex: 1.3,
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    landscapeButtonsRow: {
-      flexDirection: 'row',
-      marginHorizontal: -4,
-      marginTop: 8,
     },
     header: {
       flexDirection: 'row',
@@ -585,9 +567,10 @@ function createStyles(colors: ThemeColors) {
     playersGap: {
       width: 12,
     },
-    primaryRow: {
+    actionsRow: {
       flexDirection: 'row',
       marginHorizontal: -4,
+      marginTop: 12,
     },
     primaryButton: {
       flex: 1,
@@ -624,11 +607,6 @@ function createStyles(colors: ThemeColors) {
       fontSize: 16,
       fontWeight: '700',
     },
-    secondaryRow: {
-      flexDirection: 'row',
-      marginTop: 12,
-      marginBottom: 24,
-    },
     secondaryButton: {
       flex: 1,
       flexDirection: 'row',
@@ -642,16 +620,9 @@ function createStyles(colors: ThemeColors) {
       borderWidth: 2,
       borderColor: 'transparent',
     },
-    secondaryButtonHighlighted: {
-      borderColor: colors.accent,
-    },
     secondaryButtonText: {
       color: colors.text,
       fontSize: 16,
-      fontWeight: '700',
-    },
-    secondaryButtonTextHighlighted: {
-      color: colors.accent,
       fontWeight: '700',
     },
     foulButtonHighlighted: {

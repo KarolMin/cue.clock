@@ -22,11 +22,17 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    Liczba dostępnych przedłużeń na partię jest konfigurowalna (domyślnie 1,
    zgodnie z zasadami zawodowymi — patrz niżej), więc da się ustawić np. 0
    (brak przedłużeń) lub więcej.
-5. **Zmiana zawodnika** — ręczny przycisk sędziego/gracza przełącza aktywnego
-   zawodnika i resetuje zegar uderzenia do pełnej wartości.
-6. **Nowe uderzenie** — resetuje zegar uderzenia do pełnej wartości bez
-   zmiany zawodnika na ruchu (kontynuacja tej samej kolejki po skutecznym
-   uderzeniu), dostępne również w trakcie odliczania.
+5. **Zmiana zawodnika / nowe uderzenie** — nie ma osobnych przycisków; dotknięcie
+   panelu aktywnego zawodnika resetuje mu zegar uderzenia (nowe uderzenie tej
+   samej kolejki), a dotknięcie panelu drugiego zawodnika przełącza na niego
+   i resetuje zegar. Żadna z tych akcji (ani faul) nie uruchamia zegara
+   automatycznie — zawsze wymagane jest wciśnięcie przycisku Start.
+5b. **Faul** — osobny przycisk zgłasza faul inny niż przekroczenie czasu
+   (np. naruszenie zasad); ma ten sam efekt co faul czasowy (kończy
+   bieżące uderzenie, automatycznie przełącza na drugiego zawodnika z premią
+   +5 s na jego zegarze), ale liczony jest osobno ("Inne faule" w
+   podsumowaniu, niezależnie od "Przekroczeń czasu"). Ta sama premia +5 s
+   obowiązuje też po zwykłym faulu czasowym.
 6a. **Zakończenie partii** — wskazanie zwycięzcy partii (dwa przyciski, po
    jednym na gracza) inkrementuje wynik meczu, pokazuje krótkie podsumowanie
    partii (przedłużenia wykorzystane w tej partii) i resetuje licznik
@@ -80,12 +86,21 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
     oznacza stan aktywny/dostępny (przedłużenie, stepper, przełącznik czasu
     meczu), szary — nieaktywny/wyczerpany, a żółty/czerwony — ostrzeżenie
     10 s / faul czasowy niezależnie od gracza.
-13. **Ikony przycisków** (Ionicons z `@expo/vector-icons`) — play/pause dla
-    Start/Pauza, odśwież dla Nowego uderzenia, dwie strzałki dla Zmiany
-    zawodnika, flaga dla Zakończenia partii, power dla Zakończenia meczu,
-    klepsydra dla Przedłużenia. Start/Pauza i Zakończ partię są w tym samym
-    (drugim) rzędzie przycisków, Nowe uderzenie i Zmiana zawodnika w rzędzie
-    pierwszym.
+13. **Ikony przycisków** (Ionicons z `@expo/vector-icons`) — warning dla Faulu,
+    play/pause dla Start/Pauza, flaga dla Zakończenia partii, power dla
+    Zakończenia meczu, klepsydra dla Przedłużenia. Faul, Start/Pauza i
+    Zakończ partię są w jednym rzędzie przycisków (poziomo, w tej kolejności),
+    zarówno w pionowym, jak i poziomym układzie ekranu.
+14. **Układ poziomy (tablet / obrócony telefon)** — gdy szerokość ekranu jest
+    większa niż wysokość, panele obu zawodników przesuwają się na boki, a
+    zegar uderzenia zostaje wyśrodkowany między nimi; rząd przycisków akcji
+    pozostaje jeden, na dole ekranu.
+15. **Język interfejsu** — wybór spośród polskiego, angielskiego, niemieckiego,
+    francuskiego i hiszpańskiego, przełączany na ekranie ustawień. Przy
+    pierwszym uruchomieniu (brak zapisanych ustawień) język jest wykrywany
+    automatycznie z ustawień lokalnych urządzenia (`expo-localization`);
+    jeśli język urządzenia nie jest wspierany, domyślnie używany jest polski.
+    Wybór jest zapamiętywany lokalnie razem z resztą ustawień.
 
 Poza zakresem MVP (świadomie pominięte, można dodać później):
 wielu sędziów/urządzeń w sieci, historia wielu meczów (obecnie tylko bieżący
@@ -125,6 +140,7 @@ domyślne ustawienia startowe aplikacji.
 
 ```ts
 interface Settings {
+  language: 'pl' | 'en' | 'de' | 'fr' | 'es'; // domyślnie wykrywany z urządzenia, fallback 'pl'
   shotSeconds: number;          // domyślnie 30, zakres 5–120
   extensionSeconds: number;     // domyślnie 30, zakres 0–120
   extensionsPerGame: number;    // domyślnie 1, zakres 0–5
