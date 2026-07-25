@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from '../i18n/LanguageContext';
 import { ThemeColors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -27,7 +26,6 @@ export function PlayerPanel({
   onPressPlayer,
 }: Props) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const extensionsLeft = extensionsPerGame - extensionsUsed;
 
@@ -66,7 +64,7 @@ export function PlayerPanel({
           color={canUseExtension ? colors.accentText : colors.disabledText}
         />
         <Text style={[styles.extButtonText, !canUseExtension && styles.extButtonTextDisabled]}>
-          {t('playerExtensionButton')}
+          EXT
         </Text>
       </Pressable>
     </Pressable>

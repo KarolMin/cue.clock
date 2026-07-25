@@ -70,9 +70,6 @@ const pl = {
   statExtensionsTotal: 'Przedłużenia łącznie',
   statTimeouts: 'Przekroczenia czasu',
   statOtherFouls: 'Inne faule',
-
-  // Player panel
-  playerExtensionButton: 'Przedłużenie',
 };
 
 export type TranslationKey = keyof typeof pl;
@@ -144,8 +141,6 @@ const en: Record<TranslationKey, string> = {
   statExtensionsTotal: 'Extensions total',
   statTimeouts: 'Time-out fouls',
   statOtherFouls: 'Other fouls',
-
-  playerExtensionButton: 'Extension',
 };
 
 const de: Record<TranslationKey, string> = {
@@ -215,8 +210,6 @@ const de: Record<TranslationKey, string> = {
   statExtensionsTotal: 'Verlängerungen gesamt',
   statTimeouts: 'Zeitüberschreitungen',
   statOtherFouls: 'Andere Fouls',
-
-  playerExtensionButton: 'Verlängerung',
 };
 
 const fr: Record<TranslationKey, string> = {
@@ -286,8 +279,6 @@ const fr: Record<TranslationKey, string> = {
   statExtensionsTotal: 'Prolongations au total',
   statTimeouts: 'Fautes de temps',
   statOtherFouls: 'Autres fautes',
-
-  playerExtensionButton: 'Prolongation',
 };
 
 const es: Record<TranslationKey, string> = {
@@ -357,8 +348,6 @@ const es: Record<TranslationKey, string> = {
   statExtensionsTotal: 'Prórrogas totales',
   statTimeouts: 'Faltas de tiempo',
   statOtherFouls: 'Otras faltas',
-
-  playerExtensionButton: 'Prórroga',
 };
 
 export const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
