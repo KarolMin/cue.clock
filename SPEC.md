@@ -5,8 +5,14 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
 
 ## 1. Zakres funkcjonalny
 
-1. **Start / pauza meczu** — jeden przycisk uruchamia/zatrzymuje odliczanie
-   czasu na aktualne uderzenie.
+1. **Start / pauza meczu** — jeden przycisk uruchamia/zatrzymuje jednocześnie
+   trzy liczniki: zegar na aktualne uderzenie, czas trwania partii i czas
+   trwania meczu. Wszystkie trzy biegną tylko wtedy, gdy zegar uderzenia jest
+   aktywnie uruchomiony — pauza, faul (czasowy lub zgłoszony ręcznie) i
+   przerwa między uderzeniami zatrzymują je razem; żaden z nich nie biegnie
+   w tle samodzielnie. Partia/mecz mogą zostać uruchomione wyłącznie tym
+   przyciskiem — dotknięcie panelu zawodnika czy zgłoszenie faulu resetuje
+   zegar uderzenia, ale nigdy nie uruchamia go automatycznie.
 2. **Zegar na uderzenie** — odliczanie w dół od skonfigurowanej wartości.
    Po osiągnięciu 0 zegar zatrzymuje się automatycznie, odtwarzany jest sygnał
    dźwiękowy + wibracja (faul czasowy), a UI podświetla się na czerwono.
