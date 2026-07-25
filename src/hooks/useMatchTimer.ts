@@ -234,10 +234,17 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
   // tap (once the shot clock is already paused) resets it for the next shot
   // and — if the match is still running — resumes it immediately, with no
   // separate Start press needed.
+  //
+  // If nothing has run yet on the current shot (shotElapsedMs === 0) — e.g.
+  // right after a manual Foul loaded the ball-in-hand bonus time — a tap
+  // just starts that already-loaded time instead of resetting it again.
   const newShot = useCallback(() => {
     setState((prev) => {
       if (prev.isRunning) {
         return { ...prev, isRunning: false };
+      }
+      if (prev.shotElapsedMs === 0) {
+        return { ...prev, isRunning: prev.isMatchRunning };
       }
       warningFiredRef.current = false;
       lastTickSecondRef.current = null;
@@ -277,9 +284,10 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
 
   // Manually calls a foul on the current player for a reason other than the
   // shot clock running out (e.g. a rules violation) — tallied separately from
-  // time-out fouls. Like a time-out foul, it immediately switches to the
-  // other player and starts their shot clock right away (with the ball-in-
-  // hand bonus) without pausing the game/match clock.
+  // time-out fouls. Immediately switches to the other player and loads their
+  // shot clock with the ball-in-hand bonus, without pausing the game/match
+  // clock — but (unlike a time-out foul) it doesn't start ticking on its
+  // own: the opponent's shot only starts once their panel is tapped.
   const callFoul = useCallback(() => {
     warningFiredRef.current = false;
     lastTickSecondRef.current = null;
@@ -297,7 +305,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           ...prev.totalOtherFouls,
           [prev.currentPlayer]: prev.totalOtherFouls[prev.currentPlayer] + 1,
         },
-        isRunning: prev.isMatchRunning,
+        isRunning: false,
       };
     });
   }, [settings.shotSeconds]);
