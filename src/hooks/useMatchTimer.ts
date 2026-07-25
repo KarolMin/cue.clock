@@ -175,20 +175,37 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           }
         }
 
+        // A shot-clock timeout is a foul, but — unlike Pause or a manually
+        // called foul — it doesn't stop the game/match clock: it instantly
+        // switches to the opponent (with the usual ball-in-hand bonus) and
+        // keeps their shot clock running right away. A simultaneous
+        // match/game time expiry still overrides this and halts everything.
+        const timeoutFoulSwitch = shotJustExpired && !matchJustExpired && !gameJustExpired;
+        if (timeoutFoulSwitch) {
+          warningFiredRef.current = false;
+          lastTickSecondRef.current = null;
+        }
+
         return {
           ...prev,
-          shotRemainingMs,
-          shotElapsedMs: shotJustExpired ? 0 : shotElapsedMs,
-          isExpired: prev.isExpired || shotJustExpired,
+          currentPlayer: timeoutFoulSwitch
+            ? prev.currentPlayer === 1
+              ? 2
+              : 1
+            : prev.currentPlayer,
+          shotRemainingMs: timeoutFoulSwitch
+            ? settings.shotSeconds * 1000 + FOUL_SWITCH_BONUS_SECONDS * 1000
+            : shotRemainingMs,
+          shotElapsedMs: timeoutFoulSwitch ? 0 : shotJustExpired ? 0 : shotElapsedMs,
+          isExpired: matchJustExpired || gameJustExpired ? shotJustExpired : false,
           matchElapsedMs: prev.matchElapsedMs + deltaMs,
           gameElapsedMs: prev.isGameTimeExpired ? prev.gameElapsedMs : prev.gameElapsedMs + deltaMs,
           totalRemainingMs,
           totalGameRemainingMs,
           isMatchTimeExpired: prev.isMatchTimeExpired || matchJustExpired,
           isGameTimeExpired: prev.isGameTimeExpired || gameJustExpired,
-          isRunning: shotJustExpired || matchJustExpired || gameJustExpired ? false : prev.isRunning,
-          isMatchRunning:
-            shotJustExpired || matchJustExpired || gameJustExpired ? false : prev.isMatchRunning,
+          isRunning: matchJustExpired || gameJustExpired ? false : shotJustExpired ? true : prev.isRunning,
+          isMatchRunning: matchJustExpired || gameJustExpired ? false : prev.isMatchRunning,
           totalFouls: shotJustExpired
             ? { ...prev.totalFouls, [prev.currentPlayer]: prev.totalFouls[prev.currentPlayer] + 1 }
             : prev.totalFouls,
