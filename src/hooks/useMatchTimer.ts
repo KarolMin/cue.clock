@@ -210,6 +210,8 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
     });
   }, []);
 
+  // Resets the shot clock for a new shot. Never auto-starts it — the shot
+  // clock only ever starts running from an explicit Start button press.
   const newShot = useCallback(() => {
     warningFiredRef.current = false;
     lastTickSecondRef.current = null;
@@ -219,11 +221,11 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
       shotElapsedMs: 0,
       shotLog: logShotIfNeeded(prev),
       isExpired: false,
-      isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
-      matchStarted: true,
+      isRunning: false,
     }));
   }, [settings.shotSeconds]);
 
+  // Switches to the other player. Never auto-starts the shot clock.
   const switchPlayer = useCallback(() => {
     warningFiredRef.current = false;
     lastTickSecondRef.current = null;
@@ -236,17 +238,16 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         shotElapsedMs: 0,
         shotLog: logShotIfNeeded(prev),
         isExpired: false,
-        isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
-        matchStarted: true,
+        isRunning: false,
       };
     });
   }, [settings.shotSeconds]);
 
   // Manually calls a foul on the current player for a reason other than the
   // shot clock running out (e.g. a rules violation) — tallied separately from
-  // time-out fouls. Immediately switches to the other player and starts
-  // their shot (with the ball-in-hand bonus), the same way switchPlayer does
-  // after a time-out foul, instead of waiting for a separate manual switch.
+  // time-out fouls. Immediately switches to the other player, ready to take
+  // their shot with the ball-in-hand bonus, but (like every other action)
+  // never auto-starts the clock — the Start button must be pressed.
   const callFoul = useCallback(() => {
     warningFiredRef.current = false;
     lastTickSecondRef.current = null;
@@ -264,8 +265,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           ...prev.totalOtherFouls,
           [prev.currentPlayer]: prev.totalOtherFouls[prev.currentPlayer] + 1,
         },
-        isRunning: !prev.isMatchTimeExpired && !prev.isGameTimeExpired,
-        matchStarted: true,
+        isRunning: false,
       };
     });
   }, [settings.shotSeconds]);

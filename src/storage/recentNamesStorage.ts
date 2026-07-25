@@ -14,10 +14,10 @@ export async function loadRecentNames(): Promise<string[]> {
   }
 }
 
-export async function rememberName(name: string): Promise<string[]> {
+export async function rememberName(name: string, excluded: string[] = []): Promise<string[]> {
   const trimmed = name.trim();
   const existing = await loadRecentNames();
-  if (!trimmed || ['Gracz 1', 'Gracz 2'].includes(trimmed)) return existing;
+  if (!trimmed || excluded.includes(trimmed)) return existing;
 
   const next = [trimmed, ...existing.filter((n) => n.toLowerCase() !== trimmed.toLowerCase())].slice(
     0,

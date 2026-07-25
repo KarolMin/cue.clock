@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
+import { LanguageProvider } from './src/i18n/LanguageContext';
+import { LanguageCode } from './src/i18n/languages';
 import { MatchScreen } from './src/screens/MatchScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { loadSettings, saveSettings } from './src/storage/settingsStorage';
@@ -25,23 +27,27 @@ function AppInner() {
     saveSettings(next);
   };
 
+  const setLanguage = (language: LanguageCode) => updateSettings({ ...settings, language });
+
   if (!loaded) {
     return <View style={{ flex: 1, backgroundColor: colors.background }} />;
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {screen === 'settings' ? (
-        <SettingsScreen
-          settings={settings}
-          onChange={updateSettings}
-          onStart={() => setScreen('match')}
-        />
-      ) : (
-        <MatchScreen settings={settings} onEndMatch={() => setScreen('settings')} />
-      )}
-      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-    </View>
+    <LanguageProvider language={settings.language} onChangeLanguage={setLanguage}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        {screen === 'settings' ? (
+          <SettingsScreen
+            settings={settings}
+            onChange={updateSettings}
+            onStart={() => setScreen('match')}
+          />
+        ) : (
+          <MatchScreen settings={settings} onEndMatch={() => setScreen('settings')} />
+        )}
+        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      </View>
+    </LanguageProvider>
   );
 }
 

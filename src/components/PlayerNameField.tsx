@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { FocusEvent, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ThemeColors } from '../theme/colors';
@@ -33,17 +34,20 @@ export function PlayerNameField({
 
   return (
     <View>
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        onEndEditing={onCommit}
-        onBlur={onCommit}
-        onFocus={handleWebFocus}
-        selectTextOnFocus
-        placeholder={placeholder}
-        placeholderTextColor={colors.placeholder}
-      />
+      <View style={styles.inputWrap}>
+        <TextInput
+          style={styles.input}
+          value={value}
+          onChangeText={onChangeText}
+          onEndEditing={onCommit}
+          onBlur={onCommit}
+          onFocus={handleWebFocus}
+          selectTextOnFocus
+          placeholder={placeholder}
+          placeholderTextColor={colors.placeholder}
+        />
+        <Ionicons name="pencil" size={16} color={colors.placeholder} style={styles.editIcon} />
+      </View>
       {suggestions.length > 0 && (
         <View style={styles.chipsRow}>
           {suggestions.map((name) => (
@@ -61,14 +65,22 @@ export function PlayerNameField({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    inputWrap: {
+      justifyContent: 'center',
+    },
     input: {
       backgroundColor: colors.inputBackground,
       color: colors.text,
       borderRadius: 10,
       paddingHorizontal: 14,
+      paddingRight: 38,
       paddingVertical: 10,
       marginTop: 10,
       fontSize: 15,
+    },
+    editIcon: {
+      position: 'absolute',
+      right: 14,
     },
     chipsRow: {
       flexDirection: 'row',

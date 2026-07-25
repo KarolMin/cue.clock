@@ -1,4 +1,7 @@
+import { DEFAULT_LANGUAGE, LanguageCode } from '../i18n/languages';
+
 export interface Settings {
+  language: LanguageCode;
   shotSeconds: number;
   extensionSeconds: number;
   extensionsPerGame: number;
@@ -14,6 +17,7 @@ export interface Settings {
 // Defaults based on professional 9-ball / pool shot-clock rules
 // (Matchroom World Nineball Tour, WPA-sanctioned events). See SPEC.md.
 export const DEFAULT_SETTINGS: Settings = {
+  language: DEFAULT_LANGUAGE,
   shotSeconds: 30,
   extensionSeconds: 30,
   extensionsPerGame: 1,
