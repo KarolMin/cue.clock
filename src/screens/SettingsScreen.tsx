@@ -218,6 +218,28 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             </View>
           </View>
 
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('settingsSoundSectionTitle')}</Text>
+            <View style={styles.switchRow}>
+              <Text style={styles.soundLabel}>{t('settingsShotClockSoundLabel')}</Text>
+              <Switch
+                value={settings.shotClockSoundEnabled}
+                onValueChange={(v) => update({ shotClockSoundEnabled: v })}
+                trackColor={{ false: colors.disabledSurface, true: colors.accent }}
+                thumbColor="#ffffff"
+              />
+            </View>
+            <View style={[styles.switchRow, { marginTop: 12 }]}>
+              <Text style={styles.soundLabel}>{t('settingsGameTimeWarningSoundLabel')}</Text>
+              <Switch
+                value={settings.gameTimeWarningSoundEnabled}
+                onValueChange={(v) => update({ gameTimeWarningSoundEnabled: v })}
+                trackColor={{ false: colors.disabledSurface, true: colors.accent }}
+                thumbColor="#ffffff"
+              />
+            </View>
+          </View>
+
           <Pressable style={styles.startButton} onPress={onStart}>
             <Text style={styles.startButtonText}>{t('settingsStartButton')}</Text>
           </Pressable>
@@ -297,6 +319,13 @@ function createStyles(colors: ThemeColors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+    },
+    soundLabel: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: '600',
+      flexShrink: 1,
+      marginRight: 12,
     },
     helperText: {
       color: colors.textSecondary,

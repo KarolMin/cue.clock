@@ -62,7 +62,7 @@ export function PlayerPanel({
       >
         <Ionicons
           name="hourglass"
-          size={15}
+          size={17}
           color={canUseExtension ? colors.accentText : colors.disabledText}
         />
         <Text style={[styles.extButtonText, !canUseExtension && styles.extButtonTextDisabled]}>
@@ -78,27 +78,28 @@ function createStyles(colors: ThemeColors) {
     panel: {
       flex: 1,
       backgroundColor: colors.surface,
-      borderRadius: 24,
-      padding: 28,
+      borderRadius: 28,
+      paddingVertical: 34,
+      paddingHorizontal: 14,
       alignItems: 'center',
       borderWidth: 3,
       borderColor: colors.panelInactiveBorder,
     },
     name: {
       color: colors.textSecondary,
-      fontSize: 26,
+      fontSize: 24,
       fontWeight: '600',
-      marginBottom: 12,
+      marginBottom: 14,
     },
     dotsRow: {
       flexDirection: 'row',
-      marginBottom: 14,
+      marginBottom: 16,
     },
     dot: {
-      width: 14,
-      height: 14,
-      borderRadius: 7,
-      marginHorizontal: 3,
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      marginHorizontal: 4,
     },
     dotAvailable: {
       backgroundColor: colors.accent,
@@ -109,11 +110,11 @@ function createStyles(colors: ThemeColors) {
     extButton: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
+      gap: 7,
       backgroundColor: colors.accent,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
-      borderRadius: 14,
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      borderRadius: 16,
     },
     extButtonDisabled: {
       backgroundColor: colors.disabledSurface,
@@ -121,7 +122,7 @@ function createStyles(colors: ThemeColors) {
     extButtonText: {
       color: colors.accentText,
       fontWeight: '700',
-      fontSize: 15,
+      fontSize: 16,
     },
     extButtonTextDisabled: {
       color: colors.disabledText,

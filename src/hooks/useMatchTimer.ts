@@ -41,11 +41,14 @@ interface Callbacks {
   onWarning?: () => void;
   onTick?: () => void;
   onBuzzer?: () => void;
+  onGameTimeWarning?: () => void;
 }
 
 const TICK_MS = 100;
 const WARNING_THRESHOLD_MS = 10_000;
 const FINAL_COUNTDOWN_SECONDS = 5;
+// Game-time-remaining warnings (only relevant when a max game time is set).
+const GAME_TIME_WARNING_THRESHOLDS_MS = [120_000, 60_000];
 // Ball-in-hand bonus: after any foul (time-out or manually called), the
 // incoming player gets a few extra seconds on their next shot once they
 // switch in.
@@ -89,6 +92,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
   const matchTsRef = useRef<number | null>(null);
   const warningFiredRef = useRef(false);
   const lastTickSecondRef = useRef<number | null>(null);
+  const gameTimeWarningsFiredRef = useRef<Set<number>>(new Set());
   const callbacksRef = useRef(callbacks);
   callbacksRef.current = callbacks;
 
@@ -184,6 +188,18 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
 
         if (matchJustExpired || gameJustExpired) {
           callbacksRef.current.onBuzzer?.();
+        }
+
+        for (const threshold of GAME_TIME_WARNING_THRESHOLDS_MS) {
+          if (
+            !gameTimeWarningsFiredRef.current.has(threshold) &&
+            totalGameRemainingMs !== null &&
+            totalGameRemainingMs <= threshold &&
+            totalGameRemainingMs > 0
+          ) {
+            gameTimeWarningsFiredRef.current.add(threshold);
+            callbacksRef.current.onGameTimeWarning?.();
+          }
         }
 
         return {
@@ -291,6 +307,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
     (winner: PlayerId) => {
       warningFiredRef.current = false;
       lastTickSecondRef.current = null;
+      gameTimeWarningsFiredRef.current.clear();
       setState((prev) => ({
         ...prev,
         score: { ...prev.score, [winner]: prev.score[winner] + 1 },
