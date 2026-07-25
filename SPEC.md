@@ -14,9 +14,14 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    (Start/Pauza).
 
    Żaden faul — ani czasowy, ani zgłoszony ręcznie przyciskiem "Faul" — nie
-   zatrzymuje czasu partii/meczu. Oba od razu przełączają na przeciwnika i
-   natychmiast uruchamiają jego zegar uderzenia (z bonusem czasu za faul),
-   bez żadnej pauzy i bez potrzeby wciskania Start.
+   zatrzymuje czasu partii/meczu; oba od razu przełączają na przeciwnika i
+   ładują mu zegar uderzenia z bonusem czasu za faul. Różnią się tym, kiedy
+   ten zegar zaczyna odliczać:
+   - faul czasowy (przekroczenie czasu na uderzenie) uruchamia zegar
+     przeciwnika natychmiast, bez potrzeby dotykania czegokolwiek,
+   - faul zgłoszony ręcznie przyciskiem "Faul" **nie** startuje zegara
+     automatycznie — czeka załadowany (z bonusem), a odliczanie zaczyna się
+     dopiero od dotknięcia panelu przeciwnika.
 
    Dotknięcie panelu zawodnika (nowe uderzenie / zmiana zawodnika) też nigdy
    nie zatrzymuje czasu partii/meczu, ale działa dwuetapowo, jak zegar
@@ -25,7 +30,9 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
      resetowania go (odpowiednik "oddano uderzenie, czekamy na wynik"),
    - dopiero kolejne dotknięcie **resetuje** zegar uderzenia do pełnej
      wartości i — jeśli mecz jest uruchomiony — od razu wznawia jego
-     odliczanie, bez konieczności ponownego wciskania Start.
+     odliczanie, bez konieczności ponownego wciskania Start. Wyjątkiem jest
+     zegar już załadowany po faulu zgłoszonym ręcznie (patrz wyżej) — tam
+     dotknięcie tylko go uruchamia, bez ponownego resetowania wartości.
 2. **Zegar na uderzenie** — odliczanie w dół od skonfigurowanej wartości.
    Po osiągnięciu 0 odtwarzany jest sygnał dźwiękowy + wibracja (faul
    czasowy), po czym zegar natychmiast startuje od nowa dla przeciwnika.
