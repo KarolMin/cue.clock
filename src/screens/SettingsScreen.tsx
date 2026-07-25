@@ -12,6 +12,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { AppModal } from '../components/AppModal';
 import { NumberStepper } from '../components/NumberStepper';
 import { PlayerNameField } from '../components/PlayerNameField';
 import { useTranslation } from '../i18n/LanguageContext';
@@ -35,6 +36,7 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
   const [player1Name, setPlayer1Name] = useState(settings.player1Name);
   const [player2Name, setPlayer2Name] = useState(settings.player2Name);
   const [recentNames, setRecentNames] = useState<string[]>([]);
+  const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
 
   useEffect(() => {
     loadRecentNames().then(setRecentNames);
@@ -199,26 +201,6 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('settingsLanguageSectionTitle')}</Text>
-            <View style={styles.languageRow}>
-              {SUPPORTED_LANGUAGES.map((code) => {
-                const active = settings.language === code;
-                return (
-                  <Pressable
-                    key={code}
-                    style={[styles.languageChip, active && styles.languageChipActive]}
-                    onPress={() => update({ language: code })}
-                  >
-                    <Text style={[styles.languageChipText, active && styles.languageChipTextActive]}>
-                      {LANGUAGE_LABELS[code]}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-
-          <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('settingsSoundSectionTitle')}</Text>
             <View style={styles.switchRow}>
               <Text style={styles.soundLabel}>{t('settingsShotClockSoundLabel')}</Text>
@@ -240,11 +222,46 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
             </View>
           </View>
 
+          <View style={styles.section}>
+            <View style={styles.switchRow}>
+              <Text style={styles.sectionTitle}>{t('settingsLanguageSectionTitle')}</Text>
+              <Pressable style={styles.languageDropdown} onPress={() => setLanguagePickerOpen(true)}>
+                <Text style={styles.languageDropdownText}>{LANGUAGE_LABELS[settings.language]}</Text>
+                <Ionicons name="chevron-down" size={14} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+          </View>
+
           <Pressable style={styles.startButton} onPress={onStart}>
             <Text style={styles.startButtonText}>{t('settingsStartButton')}</Text>
           </Pressable>
         </View>
       </ScrollView>
+
+      <AppModal visible={languagePickerOpen}>
+        <Text style={styles.modalTitle}>{t('settingsLanguageSectionTitle')}</Text>
+        {SUPPORTED_LANGUAGES.map((code) => {
+          const active = settings.language === code;
+          return (
+            <Pressable
+              key={code}
+              style={[styles.languageOption, active && styles.languageOptionActive]}
+              onPress={() => {
+                update({ language: code });
+                setLanguagePickerOpen(false);
+              }}
+            >
+              <Text style={[styles.languageOptionText, active && styles.languageOptionTextActive]}>
+                {LANGUAGE_LABELS[code]}
+              </Text>
+              {active && <Ionicons name="checkmark" size={18} color={colors.accent} />}
+            </Pressable>
+          );
+        })}
+        <Pressable style={styles.modalCancel} onPress={() => setLanguagePickerOpen(false)}>
+          <Text style={styles.modalCancelText}>{t('matchCancel')}</Text>
+        </Pressable>
+      </AppModal>
     </KeyboardAvoidingView>
   );
 }
@@ -332,32 +349,57 @@ function createStyles(colors: ThemeColors) {
       fontSize: 12,
       marginTop: 4,
     },
-    languageRow: {
+    languageDropdown: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-      marginTop: 8,
-    },
-    languageChip: {
+      alignItems: 'center',
+      gap: 6,
       backgroundColor: colors.controlSurface,
       borderRadius: 999,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderWidth: 2,
-      borderColor: 'transparent',
+      paddingHorizontal: 14,
+      paddingVertical: 8,
     },
-    languageChipActive: {
-      backgroundColor: `${colors.accent}22`,
-      borderColor: colors.accent,
-    },
-    languageChipText: {
-      color: colors.textSecondary,
+    languageDropdownText: {
+      color: colors.text,
       fontSize: 14,
       fontWeight: '600',
     },
-    languageChipTextActive: {
+    modalTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '700',
+      textAlign: 'center',
+      marginBottom: 16,
+    },
+    languageOption: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      marginBottom: 6,
+    },
+    languageOptionActive: {
+      backgroundColor: `${colors.accent}22`,
+    },
+    languageOptionText: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    languageOptionTextActive: {
       color: colors.accent,
       fontWeight: '700',
+    },
+    modalCancel: {
+      alignItems: 'center',
+      paddingVertical: 12,
+      marginTop: 4,
+    },
+    modalCancelText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      fontWeight: '600',
     },
     startButton: {
       backgroundColor: colors.accent,

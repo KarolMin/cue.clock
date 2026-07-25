@@ -205,31 +205,46 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
   const toggleRunning = useCallback(() => {
     setState((prev) => {
       if (prev.isExpired || prev.isMatchTimeExpired || prev.isGameTimeExpired) return prev;
-      const next = !prev.isRunning;
+      const next = !prev.isMatchRunning;
       return { ...prev, isRunning: next, isMatchRunning: next };
     });
   }, []);
 
-  // Resets the shot clock for a new shot. Never auto-starts it — the shot
-  // clock only ever starts running from an explicit Start button press.
+  // Tapping the shooting player's own panel is a two-stage action, like a
+  // chess clock: while their shot clock is actively ticking, the first tap
+  // only freezes it in place (no reset) so match/game time keep running
+  // uninterrupted and the Start/Pause button stays untouched. Only a second
+  // tap (once the shot clock is already paused) resets it for the next shot
+  // and — if the match is still running — resumes it immediately, with no
+  // separate Start press needed.
   const newShot = useCallback(() => {
-    warningFiredRef.current = false;
-    lastTickSecondRef.current = null;
-    setState((prev) => ({
-      ...prev,
-      shotRemainingMs: settings.shotSeconds * 1000,
-      shotElapsedMs: 0,
-      shotLog: logShotIfNeeded(prev),
-      isExpired: false,
-      isRunning: false,
-    }));
+    setState((prev) => {
+      if (prev.isRunning) {
+        return { ...prev, isRunning: false };
+      }
+      warningFiredRef.current = false;
+      lastTickSecondRef.current = null;
+      return {
+        ...prev,
+        shotRemainingMs: settings.shotSeconds * 1000,
+        shotElapsedMs: 0,
+        shotLog: logShotIfNeeded(prev),
+        isExpired: false,
+        isRunning: prev.isMatchRunning,
+      };
+    });
   }, [settings.shotSeconds]);
 
-  // Switches to the other player. Never auto-starts the shot clock.
+  // Same two-stage behaviour as newShot, but for switching to the other
+  // player: first tap just freezes the shot clock, second tap performs the
+  // actual switch and resets/resumes it.
   const switchPlayer = useCallback(() => {
-    warningFiredRef.current = false;
-    lastTickSecondRef.current = null;
     setState((prev) => {
+      if (prev.isRunning) {
+        return { ...prev, isRunning: false };
+      }
+      warningFiredRef.current = false;
+      lastTickSecondRef.current = null;
       const foulBonusMs = prev.isExpired ? FOUL_SWITCH_BONUS_SECONDS * 1000 : 0;
       return {
         ...prev,
@@ -238,7 +253,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         shotElapsedMs: 0,
         shotLog: logShotIfNeeded(prev),
         isExpired: false,
-        isRunning: false,
+        isRunning: prev.isMatchRunning,
       };
     });
   }, [settings.shotSeconds]);

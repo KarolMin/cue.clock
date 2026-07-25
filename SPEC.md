@@ -10,10 +10,17 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    trwania meczu. Partia/mecz mogą zostać uruchomione wyłącznie tym
    przyciskiem — nic nie startuje automatycznie. Pauza, faul (czasowy lub
    zgłoszony ręcznie) zatrzymują wszystkie trzy liczniki razem; żaden z nich
-   nie biegnie w tle samodzielnie po takiej pauzie. Wyjątkiem jest dotknięcie
-   panelu zawodnika (nowe uderzenie / zmiana zawodnika) — resetuje ono tylko
-   zegar uderzenia (wymagając ponownego Start, by znów biegł), natomiast czas
-   partii i czas meczu biegną wtedy dalej bez przerwy.
+   nie biegnie w tle samodzielnie po takiej pauzie, a przycisk cały czas
+   pokazuje faktyczny stan meczu (Start/Pauza).
+
+   Dotknięcie panelu zawodnika (nowe uderzenie / zmiana zawodnika) działa
+   dwuetapowo, jak zegar szachowy, i nie wpływa na przycisk Start/Pauza ani
+   na czas partii/meczu, który biegnie wtedy dalej bez przerwy:
+   - pierwsze dotknięcie **zatrzymuje** zegar uderzenia w miejscu, bez
+     resetowania go (odpowiednik "oddano uderzenie, czekamy na wynik"),
+   - dopiero kolejne dotknięcie **resetuje** zegar uderzenia do pełnej
+     wartości i — jeśli mecz jest uruchomiony — od razu wznawia jego
+     odliczanie, bez konieczności ponownego wciskania Start.
 2. **Zegar na uderzenie** — odliczanie w dół od skonfigurowanej wartości.
    Po osiągnięciu 0 zegar zatrzymuje się automatycznie, odtwarzany jest sygnał
    dźwiękowy + wibracja (faul czasowy), a UI podświetla się na czerwono.
