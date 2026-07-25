@@ -8,25 +8,24 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
 1. **Start / pauza meczu** — jeden przycisk uruchamia/zatrzymuje jednocześnie
    trzy liczniki: zegar na aktualne uderzenie, czas trwania partii i czas
    trwania meczu. Partia/mecz mogą zostać uruchomione wyłącznie tym
-   przyciskiem — nic nie startuje automatycznie. Pauza i faul zgłoszony
-   ręcznie zatrzymują wszystkie trzy liczniki razem; żaden z nich nie biegnie
-   w tle samodzielnie po takiej pauzie, a przycisk cały czas pokazuje
-   faktyczny stan meczu (Start/Pauza).
+   przyciskiem — nic nie startuje automatycznie. Tylko ten przycisk (oraz
+   wyczerpanie limitu czasu partii/meczu) w pełni zatrzymuje wszystkie trzy
+   liczniki razem; przycisk zawsze pokazuje faktyczny stan meczu
+   (Start/Pauza).
 
-   Dwa zdarzenia stanowią wyjątek i nigdy nie zatrzymują czasu partii/meczu:
+   Żaden faul — ani czasowy, ani zgłoszony ręcznie przyciskiem "Faul" — nie
+   zatrzymuje czasu partii/meczu. Oba od razu przełączają na przeciwnika i
+   natychmiast uruchamiają jego zegar uderzenia (z bonusem czasu za faul),
+   bez żadnej pauzy i bez potrzeby wciskania Start.
 
-   - Dotknięcie panelu zawodnika (nowe uderzenie / zmiana zawodnika) działa
-     dwuetapowo, jak zegar szachowy, i nie wpływa na przycisk Start/Pauza:
-     - pierwsze dotknięcie **zatrzymuje** zegar uderzenia w miejscu, bez
-       resetowania go (odpowiednik "oddano uderzenie, czekamy na wynik"),
-     - dopiero kolejne dotknięcie **resetuje** zegar uderzenia do pełnej
-       wartości i — jeśli mecz jest uruchomiony — od razu wznawia jego
-       odliczanie, bez konieczności ponownego wciskania Start.
-   - Faul czasowy (przekroczenie czasu na uderzenie) natychmiast przełącza
-     na przeciwnika i od razu uruchamia jego zegar uderzenia (z bonusem czasu
-     za faul) — bez żadnej pauzy i bez potrzeby dotykania czegokolwiek. Faul
-     zgłoszony ręcznie przyciskiem "Faul" zachowuje się inaczej — nadal w
-     pełni zatrzymuje wszystkie trzy liczniki, wymagając ponownego Start.
+   Dotknięcie panelu zawodnika (nowe uderzenie / zmiana zawodnika) też nigdy
+   nie zatrzymuje czasu partii/meczu, ale działa dwuetapowo, jak zegar
+   szachowy, i nie wpływa na przycisk Start/Pauza:
+   - pierwsze dotknięcie **zatrzymuje** zegar uderzenia w miejscu, bez
+     resetowania go (odpowiednik "oddano uderzenie, czekamy na wynik"),
+   - dopiero kolejne dotknięcie **resetuje** zegar uderzenia do pełnej
+     wartości i — jeśli mecz jest uruchomiony — od razu wznawia jego
+     odliczanie, bez konieczności ponownego wciskania Start.
 2. **Zegar na uderzenie** — odliczanie w dół od skonfigurowanej wartości.
    Po osiągnięciu 0 odtwarzany jest sygnał dźwiękowy + wibracja (faul
    czasowy), po czym zegar natychmiast startuje od nowa dla przeciwnika.
