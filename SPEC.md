@@ -150,6 +150,8 @@ interface Settings {
   totalGameMinutes: number;     // domyślnie 15, zakres 1–120
   player1Name: string;          // domyślnie "Gracz 1"
   player2Name: string;          // domyślnie "Gracz 2"
+  shotClockSoundEnabled: boolean;      // domyślnie true
+  gameTimeWarningSoundEnabled: boolean; // domyślnie true
 }
 
 interface MatchState {
@@ -186,9 +188,15 @@ zamknięcie/restart meczu zaczyna od ekranu ustawień.
 
 ## 5. Sygnalizacja
 
-- 10 s pozostało: krótki podwójny sygnał dźwiękowy + wibracja + żółty kolor.
-- 0 s: dłuższy sygnał (buzzer) + mocniejsza wibracja + czerwony kolor,
-  zegar zatrzymuje się automatycznie.
+- 10 s pozostało (zegar uderzenia): krótki podwójny sygnał dźwiękowy +
+  wibracja + żółty kolor.
+- 0 s (zegar uderzenia): dłuższy sygnał (buzzer) + mocniejsza wibracja +
+  czerwony kolor, zegar zatrzymuje się automatycznie.
+- 2 min i 1 min pozostało do końca partii (gdy włączony "Maksymalny czas
+  partii"): osobny sygnał dźwiękowy (dzwonek), inny niż dźwięki zegara
+  uderzenia — odtwarzany raz na każdy próg, resetowany na kolejną partię.
+- Oba rodzaje dźwięku (zegar uderzenia i ostrzeżenie o końcu partii) można
+  niezależnie wyłączyć w ustawieniach; wibracje/haptyka nie są tym wyłączane.
 - Dźwięki są zsyntetyzowane lokalnie (proste tony, brak zależności od
   zewnętrznych plików audio / licencji).
 

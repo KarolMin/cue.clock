@@ -12,6 +12,8 @@ export interface Settings {
   raceToGames: number;
   player1Name: string;
   player2Name: string;
+  shotClockSoundEnabled: boolean;
+  gameTimeWarningSoundEnabled: boolean;
 }
 
 // Defaults based on professional 9-ball / pool shot-clock rules
@@ -28,6 +30,8 @@ export const DEFAULT_SETTINGS: Settings = {
   raceToGames: 0,
   player1Name: 'Gracz 1',
   player2Name: 'Gracz 2',
+  shotClockSoundEnabled: true,
+  gameTimeWarningSoundEnabled: true,
 };
 
 export const LIMITS = {

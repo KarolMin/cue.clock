@@ -36,10 +36,10 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { playWarning, playBuzzer, playTick } = useShotClockSounds();
+  const { playWarning, playBuzzer, playTick, playGameTimeWarning } = useShotClockSounds(settings);
   const { state, toggleRunning, newShot, switchPlayer, useExtension, endGame, callFoul } = useMatchTimer(
     settings,
-    { onWarning: playWarning, onTick: playTick, onBuzzer: playBuzzer }
+    { onWarning: playWarning, onTick: playTick, onBuzzer: playBuzzer, onGameTimeWarning: playGameTimeWarning }
   );
 
   const [pickingWinner, setPickingWinner] = useState(false);

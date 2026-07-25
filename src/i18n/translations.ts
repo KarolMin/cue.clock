@@ -21,6 +21,9 @@ const pl = {
   settingsTotalGameSectionTitle: 'Maksymalny czas partii',
   settingsTotalGameTimeLabel: 'Czas partii',
   settingsLanguageSectionTitle: 'Język',
+  settingsSoundSectionTitle: 'Dźwięk',
+  settingsShotClockSoundLabel: 'Dźwięk czasu uderzenia',
+  settingsGameTimeWarningSoundLabel: 'Dźwięk ostrzeżenia o końcu partii',
   settingsStartButton: 'Rozpocznij mecz',
 
   // Match screen
@@ -94,6 +97,9 @@ const en: Record<TranslationKey, string> = {
   settingsTotalGameSectionTitle: 'Maximum game time',
   settingsTotalGameTimeLabel: 'Game time',
   settingsLanguageSectionTitle: 'Language',
+  settingsSoundSectionTitle: 'Sound',
+  settingsShotClockSoundLabel: 'Shot clock sound',
+  settingsGameTimeWarningSoundLabel: 'Game-time warning sound',
   settingsStartButton: 'Start match',
 
   matchGameLabel: 'Game {{n}}',
@@ -162,6 +168,9 @@ const de: Record<TranslationKey, string> = {
   settingsTotalGameSectionTitle: 'Maximale Rundenzeit',
   settingsTotalGameTimeLabel: 'Rundenzeit',
   settingsLanguageSectionTitle: 'Sprache',
+  settingsSoundSectionTitle: 'Ton',
+  settingsShotClockSoundLabel: 'Stoßuhr-Ton',
+  settingsGameTimeWarningSoundLabel: 'Warnton für Rundenende',
   settingsStartButton: 'Match starten',
 
   matchGameLabel: 'Runde {{n}}',
@@ -230,6 +239,9 @@ const fr: Record<TranslationKey, string> = {
   settingsTotalGameSectionTitle: 'Durée maximale de la manche',
   settingsTotalGameTimeLabel: 'Durée de la manche',
   settingsLanguageSectionTitle: 'Langue',
+  settingsSoundSectionTitle: 'Son',
+  settingsShotClockSoundLabel: 'Son du chronomètre de tir',
+  settingsGameTimeWarningSoundLabel: 'Son d’alerte de fin de manche',
   settingsStartButton: 'Commencer le match',
 
   matchGameLabel: 'Manche {{n}}',
@@ -298,6 +310,9 @@ const es: Record<TranslationKey, string> = {
   settingsTotalGameSectionTitle: 'Tiempo máximo de partida',
   settingsTotalGameTimeLabel: 'Tiempo de partida',
   settingsLanguageSectionTitle: 'Idioma',
+  settingsSoundSectionTitle: 'Sonido',
+  settingsShotClockSoundLabel: 'Sonido del reloj de tiro',
+  settingsGameTimeWarningSoundLabel: 'Sonido de aviso de fin de partida',
   settingsStartButton: 'Iniciar partido',
 
   matchGameLabel: 'Partida {{n}}',
