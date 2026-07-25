@@ -252,12 +252,12 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
       disabled={timeExpired}
     >
       <Ionicons
-        name={state.isRunning ? 'pause' : 'play'}
+        name={state.isMatchRunning ? 'pause' : 'play'}
         size={18}
         color={timeExpired ? colors.disabledText : colors.accentText}
       />
       <Text style={styles.primaryButtonText}>
-        {state.isRunning ? t('matchPauseButton') : t('matchStartButton')}
+        {state.isMatchRunning ? t('matchPauseButton') : t('matchStartButton')}
       </Text>
     </Pressable>
   );
