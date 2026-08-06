@@ -36,6 +36,9 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
 2. **Zegar na uderzenie** — odliczanie w dół od skonfigurowanej wartości.
    Po osiągnięciu 0 odtwarzany jest sygnał dźwiękowy + wibracja (faul
    czasowy), po czym zegar natychmiast startuje od nowa dla przeciwnika.
+   Zupełnie pierwsze uderzenie meczu (rozbicie) ma o 5 sekund więcej niż
+   skonfigurowany czas na uderzenie — każde kolejne uderzenie, w każdej
+   partii, korzysta już z pełnego, skonfigurowanego czasu.
 3. **Ostrzeżenie 10 s** — krótki sygnał dźwiękowy/wibracja i zmiana koloru
    zegara, gdy zostanie 10 sekund (analogicznie do zawołania sędziego "time"
    w rozgrywkach zawodowych). Dodatkowo od 5. sekundy zegar "tyka" — krótki
