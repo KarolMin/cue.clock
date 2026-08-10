@@ -14,6 +14,7 @@ export interface Settings {
   player2Name: string;
   shotClockSoundEnabled: boolean;
   gameTimeWarningSoundEnabled: boolean;
+  vibrationEnabled: boolean;
 }
 
 // Defaults based on professional 9-ball / pool shot-clock rules
@@ -32,6 +33,7 @@ export const DEFAULT_SETTINGS: Settings = {
   player2Name: 'Gracz 2',
   shotClockSoundEnabled: true,
   gameTimeWarningSoundEnabled: true,
+  vibrationEnabled: true,
 };
 
 export const LIMITS = {

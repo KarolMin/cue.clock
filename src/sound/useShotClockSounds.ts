@@ -18,7 +18,9 @@ export function useShotClockSounds(settings: Settings) {
       warningPlayer.seekTo(0);
       warningPlayer.play();
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    if (settings.vibrationEnabled) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    }
   };
 
   const playBuzzer = () => {
@@ -26,7 +28,9 @@ export function useShotClockSounds(settings: Settings) {
       buzzerPlayer.seekTo(0);
       buzzerPlayer.play();
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    if (settings.vibrationEnabled) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
   };
 
   const playTick = () => {
@@ -34,7 +38,9 @@ export function useShotClockSounds(settings: Settings) {
       tickPlayer.seekTo(0);
       tickPlayer.play();
     }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (settings.vibrationEnabled) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
   };
 
   // Distinct bell sound for the 2-minute / 1-minute game-time-remaining
@@ -44,7 +50,9 @@ export function useShotClockSounds(settings: Settings) {
       gameTimeWarningPlayer.seekTo(0);
       gameTimeWarningPlayer.play();
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    if (settings.vibrationEnabled) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    }
   };
 
   return { playWarning, playBuzzer, playTick, playGameTimeWarning };

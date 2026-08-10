@@ -220,6 +220,15 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
                 thumbColor="#ffffff"
               />
             </View>
+            <View style={[styles.switchRow, { marginTop: 12 }]}>
+              <Text style={styles.soundLabel}>{t('settingsVibrationLabel')}</Text>
+              <Switch
+                value={settings.vibrationEnabled}
+                onValueChange={(v) => update({ vibrationEnabled: v })}
+                trackColor={{ false: colors.disabledSurface, true: colors.accent }}
+                thumbColor="#ffffff"
+              />
+            </View>
           </View>
 
           <View style={styles.section}>

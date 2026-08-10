@@ -53,9 +53,8 @@ const GAME_TIME_WARNING_THRESHOLDS_MS = [120_000, 60_000];
 // incoming player gets a few extra seconds on their next shot once they
 // switch in.
 const FOUL_SWITCH_BONUS_SECONDS = 5;
-// The very first shot of the match — the break — gets a few extra seconds,
-// since it takes longer to line up than a regular shot. Only game 1's
-// opening shot gets this; every shot after that uses the plain shot time.
+// The first shot of every game — the break — gets a few extra seconds,
+// since it takes longer to line up than a regular shot.
 const BREAK_SHOT_BONUS_SECONDS = 5;
 
 function initialState(settings: Settings): MatchState {
@@ -345,7 +344,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
         ],
         shotLog: logShotIfNeeded(prev),
         gameNumber: prev.gameNumber + 1,
-        shotRemainingMs: settings.shotSeconds * 1000,
+        shotRemainingMs: settings.shotSeconds * 1000 + BREAK_SHOT_BONUS_SECONDS * 1000,
         shotElapsedMs: 0,
         gameElapsedMs: 0,
         totalGameRemainingMs: settings.totalGameEnabled ? settings.totalGameMinutes * 60 * 1000 : null,
