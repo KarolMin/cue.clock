@@ -210,11 +210,15 @@ zamknięcie/restart meczu zaczyna od ekranu ustawień.
   przycisk "Rozpocznij mecz".
 - **Mecz** — duży zegar uderzenia na środku (kolor zależny od pozostałego
   czasu: neutralny → żółty ≤10s → czerwony/0), pod spodem panel obu graczy
-  z nazwą, liczbą pozostałych przedłużeń i przyciskiem "Przedłużenie"
-  (aktywnym tylko dla zawodnika na ruchu, o ile ma jeszcze przedłużenia w tej
-  partii), opcjonalny mniejszy licznik łącznego czasu meczu, numer partii,
-  przyciski sterujące: Start/Pauza, Zmiana zawodnika, Nowa partia, Zakończ
-  mecz (powrót do ustawień).
+  z nazwą i liczbą pozostałych przedłużeń (dotknięcie panelu to nowe
+  uderzenie/zmiana zawodnika — patrz punkt 1). Przycisk "EXT" jest osobnym
+  elementem nad panelem zawodnika, nie częścią samego panelu — dzięki temu
+  dotknięcie panelu i użycie przedłużenia to dwa całkiem oddzielne cele
+  dotyku; aktywny tylko dla zawodnika na ruchu, o ile ma jeszcze przedłużenia
+  w tej partii, i w ogóle nie renderowany, gdy przedłużenia są wyłączone (0
+  na partię). Dodatkowo: opcjonalny mniejszy licznik łącznego czasu meczu,
+  numer partii, przyciski sterujące: Faul, Start/Pauza, Zakończ partię,
+  Zakończ mecz (powrót do ustawień).
 
 ## 5. Sygnalizacja
 

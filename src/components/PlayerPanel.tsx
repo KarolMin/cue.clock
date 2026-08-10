@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ThemeColors } from '../theme/colors';
@@ -10,8 +9,6 @@ interface Props {
   isActive: boolean;
   extensionsUsed: number;
   extensionsPerGame: number;
-  canUseExtension: boolean;
-  onUseExtension: () => void;
   onPressPlayer: () => void;
 }
 
@@ -21,8 +18,6 @@ export function PlayerPanel({
   isActive,
   extensionsUsed,
   extensionsPerGame,
-  canUseExtension,
-  onUseExtension,
   onPressPlayer,
 }: Props) {
   const { colors } = useTheme();
@@ -53,20 +48,6 @@ export function PlayerPanel({
           ))}
         </View>
       )}
-      <Pressable
-        style={[styles.extButton, !canUseExtension && styles.extButtonDisabled]}
-        onPress={onUseExtension}
-        disabled={!canUseExtension}
-      >
-        <Ionicons
-          name="hourglass"
-          size={17}
-          color={canUseExtension ? colors.accentText : colors.disabledText}
-        />
-        <Text style={[styles.extButtonText, !canUseExtension && styles.extButtonTextDisabled]}>
-          EXT
-        </Text>
-      </Pressable>
     </Pressable>
   );
 }
@@ -80,6 +61,7 @@ function createStyles(colors: ThemeColors) {
       paddingVertical: 34,
       paddingHorizontal: 14,
       alignItems: 'center',
+      justifyContent: 'center',
       borderWidth: 3,
       borderColor: colors.panelInactiveBorder,
     },
@@ -87,11 +69,10 @@ function createStyles(colors: ThemeColors) {
       color: colors.textSecondary,
       fontSize: 24,
       fontWeight: '600',
-      marginBottom: 14,
     },
     dotsRow: {
       flexDirection: 'row',
-      marginBottom: 16,
+      marginTop: 14,
     },
     dot: {
       width: 16,
@@ -104,26 +85,6 @@ function createStyles(colors: ThemeColors) {
     },
     dotUsed: {
       backgroundColor: colors.disabledSurface,
-    },
-    extButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 7,
-      backgroundColor: colors.accent,
-      paddingVertical: 14,
-      paddingHorizontal: 24,
-      borderRadius: 16,
-    },
-    extButtonDisabled: {
-      backgroundColor: colors.disabledSurface,
-    },
-    extButtonText: {
-      color: colors.accentText,
-      fontWeight: '700',
-      fontSize: 16,
-    },
-    extButtonTextDisabled: {
-      color: colors.disabledText,
     },
   });
 }

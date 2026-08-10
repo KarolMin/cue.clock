@@ -3,6 +3,7 @@ import { useKeepAwake } from 'expo-keep-awake';
 import { Fragment, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { AppModal } from '../components/AppModal';
+import { ExtensionButton } from '../components/ExtensionButton';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { StatsTable } from '../components/StatsTable';
 import { PlayerId, ShotRecord, useMatchTimer } from '../hooks/useMatchTimer';
@@ -197,37 +198,51 @@ export function MatchScreen({ settings, onEndMatch }: Props) {
   );
 
   const player1Panel = (
-    <PlayerPanel
-      name={settings.player1Name}
-      accentColor={colors.player1}
-      isActive={state.currentPlayer === 1}
-      extensionsUsed={state.extensionsUsed[1]}
-      extensionsPerGame={settings.extensionsPerGame}
-      canUseExtension={
-        state.currentPlayer === 1 &&
-        !state.isExpired &&
-        state.extensionsUsed[1] < settings.extensionsPerGame
-      }
-      onUseExtension={useExtension}
-      onPressPlayer={() => (state.currentPlayer === 1 ? newShot() : switchPlayer())}
-    />
+    <View style={styles.playerColumn}>
+      {settings.extensionsPerGame > 0 && (
+        <ExtensionButton
+          canUseExtension={
+            state.currentPlayer === 1 &&
+            !state.isExpired &&
+            state.extensionsUsed[1] < settings.extensionsPerGame
+          }
+          onUseExtension={useExtension}
+          style={styles.extButtonAbove}
+        />
+      )}
+      <PlayerPanel
+        name={settings.player1Name}
+        accentColor={colors.player1}
+        isActive={state.currentPlayer === 1}
+        extensionsUsed={state.extensionsUsed[1]}
+        extensionsPerGame={settings.extensionsPerGame}
+        onPressPlayer={() => (state.currentPlayer === 1 ? newShot() : switchPlayer())}
+      />
+    </View>
   );
 
   const player2Panel = (
-    <PlayerPanel
-      name={settings.player2Name}
-      accentColor={colors.player2}
-      isActive={state.currentPlayer === 2}
-      extensionsUsed={state.extensionsUsed[2]}
-      extensionsPerGame={settings.extensionsPerGame}
-      canUseExtension={
-        state.currentPlayer === 2 &&
-        !state.isExpired &&
-        state.extensionsUsed[2] < settings.extensionsPerGame
-      }
-      onUseExtension={useExtension}
-      onPressPlayer={() => (state.currentPlayer === 2 ? newShot() : switchPlayer())}
-    />
+    <View style={styles.playerColumn}>
+      {settings.extensionsPerGame > 0 && (
+        <ExtensionButton
+          canUseExtension={
+            state.currentPlayer === 2 &&
+            !state.isExpired &&
+            state.extensionsUsed[2] < settings.extensionsPerGame
+          }
+          onUseExtension={useExtension}
+          style={styles.extButtonAbove}
+        />
+      )}
+      <PlayerPanel
+        name={settings.player2Name}
+        accentColor={colors.player2}
+        isActive={state.currentPlayer === 2}
+        extensionsUsed={state.extensionsUsed[2]}
+        extensionsPerGame={settings.extensionsPerGame}
+        onPressPlayer={() => (state.currentPlayer === 2 ? newShot() : switchPlayer())}
+      />
+    </View>
   );
 
   const timeExpired = state.isExpired || state.isMatchTimeExpired || state.isGameTimeExpired;
@@ -566,6 +581,13 @@ function createStyles(colors: ThemeColors) {
     },
     playersGap: {
       width: 12,
+    },
+    playerColumn: {
+      flex: 1,
+    },
+    extButtonAbove: {
+      marginBottom: 12,
+      alignSelf: 'center',
     },
     actionsRow: {
       flexDirection: 'row',
