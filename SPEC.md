@@ -14,14 +14,9 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    (Start/Pauza).
 
    Żaden faul — ani czasowy, ani zgłoszony ręcznie przyciskiem "Faul" — nie
-   zatrzymuje czasu partii/meczu; oba od razu przełączają na przeciwnika i
-   ładują mu zegar uderzenia z bonusem czasu za faul. Różnią się tym, kiedy
-   ten zegar zaczyna odliczać:
-   - faul czasowy (przekroczenie czasu na uderzenie) uruchamia zegar
-     przeciwnika natychmiast, bez potrzeby dotykania czegokolwiek,
-   - faul zgłoszony ręcznie przyciskiem "Faul" **nie** startuje zegara
-     automatycznie — czeka załadowany (z bonusem), a odliczanie zaczyna się
-     dopiero od dotknięcia panelu przeciwnika.
+   zatrzymuje czasu partii/meczu i żaden nie wymaga dodatkowego dotknięcia:
+   oba od razu przełączają na przeciwnika, ładują mu zegar uderzenia z
+   bonusem czasu za faul i natychmiast uruchamiają jego odliczanie.
 
    Dotknięcie panelu zawodnika (nowe uderzenie / zmiana zawodnika) też nigdy
    nie zatrzymuje czasu partii/meczu, ale działa dwuetapowo, jak zegar
@@ -30,9 +25,7 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
      resetowania go (odpowiednik "oddano uderzenie, czekamy na wynik"),
    - dopiero kolejne dotknięcie **resetuje** zegar uderzenia do pełnej
      wartości i — jeśli mecz jest uruchomiony — od razu wznawia jego
-     odliczanie, bez konieczności ponownego wciskania Start. Wyjątkiem jest
-     zegar już załadowany po faulu zgłoszonym ręcznie (patrz wyżej) — tam
-     dotknięcie tylko go uruchamia, bez ponownego resetowania wartości.
+     odliczanie, bez konieczności ponownego wciskania Start.
 2. **Zegar na uderzenie** — odliczanie w dół od skonfigurowanej wartości.
    Po osiągnięciu 0 odtwarzany jest sygnał dźwiękowy + wibracja (faul
    czasowy), po czym zegar natychmiast startuje od nowa dla przeciwnika.
@@ -89,11 +82,15 @@ Aplikacja mobilna (Android + iOS) do mierzenia czasu na uderzenie w bilardzie
    w ustawieniach, ponieważ profesjonalne rozgrywki pool zwykle **nie** mają
    limitu czasu na cały mecz (grane są "do X wygranych partii"), ale opcja
    jest przydatna np. do gry rekreacyjnej lub rezerwacji stołu na czas.
+   Ustawiany krokowo co 5 minut, od 5 min w górę — nie da się zjechać ani
+   ustawić wartości spoza tej siatki (np. 1, 6, 11 min).
 8b. **Maksymalny czas partii (opcjonalny)** — analogiczny, opcjonalny,
     malejący licznik pojedynczej partii; niezależny od zegara na uderzenie
     i od łącznego czasu meczu. Po jego przekroczeniu zegar uderzenia się
     zatrzymuje (podobnie jak przy przekroczeniu łącznego czasu meczu) —
     partię trzeba zakończyć ręcznie. Reset przy każdej nowej partii.
+    Ustawiany krokowo co 5 minut, od 5 min w górę, tak samo jak łączny czas
+    meczu.
     Aktualny czas trwania partii oraz łączny czas trwania meczu (liczniki
     narastające, niezależne od włączenia limitów) są widoczne na ekranie
     meczu przez cały czas jego trwania.
@@ -175,9 +172,9 @@ interface Settings {
   extensionSeconds: number;     // domyślnie 30, zakres 0–120
   extensionsPerGame: number;    // domyślnie 1, zakres 0–5
   totalMatchEnabled: boolean;   // domyślnie false
-  totalMatchMinutes: number;    // domyślnie 60, zakres 1–999
+  totalMatchMinutes: number;    // domyślnie 60, zakres 5–995, krok 5
   totalGameEnabled: boolean;    // domyślnie false
-  totalGameMinutes: number;     // domyślnie 15, zakres 1–120
+  totalGameMinutes: number;     // domyślnie 15, zakres 5–120, krok 5
   player1Name: string;          // domyślnie "Gracz 1"
   player2Name: string;          // domyślnie "Gracz 2"
   shotClockSoundEnabled: boolean;      // domyślnie true

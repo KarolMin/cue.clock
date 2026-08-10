@@ -194,7 +194,7 @@ export function SettingsScreen({ settings, onChange, onStart }: Props) {
                 onChange={(v) => update({ totalGameMinutes: v })}
                 min={LIMITS.totalGameMinutes.min}
                 max={LIMITS.totalGameMinutes.max}
-                step={1}
+                step={5}
                 unit="min"
               />
             )}
