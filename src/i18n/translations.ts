@@ -24,6 +24,7 @@ const pl = {
   settingsSoundSectionTitle: 'Dźwięk',
   settingsShotClockSoundLabel: 'Dźwięk czasu uderzenia',
   settingsGameTimeWarningSoundLabel: 'Dźwięk ostrzeżenia o końcu partii',
+  settingsVibrationLabel: 'Wibracje',
   settingsStartButton: 'Rozpocznij mecz',
 
   // Match screen
@@ -97,6 +98,7 @@ const en: Record<TranslationKey, string> = {
   settingsSoundSectionTitle: 'Sound',
   settingsShotClockSoundLabel: 'Shot clock sound',
   settingsGameTimeWarningSoundLabel: 'Game-time warning sound',
+  settingsVibrationLabel: 'Vibration',
   settingsStartButton: 'Start match',
 
   matchGameLabel: 'Game {{n}}',
@@ -166,6 +168,7 @@ const de: Record<TranslationKey, string> = {
   settingsSoundSectionTitle: 'Ton',
   settingsShotClockSoundLabel: 'Stoßuhr-Ton',
   settingsGameTimeWarningSoundLabel: 'Warnton für Rundenende',
+  settingsVibrationLabel: 'Vibration',
   settingsStartButton: 'Match starten',
 
   matchGameLabel: 'Runde {{n}}',
@@ -235,6 +238,7 @@ const fr: Record<TranslationKey, string> = {
   settingsSoundSectionTitle: 'Son',
   settingsShotClockSoundLabel: 'Son du chronomètre de tir',
   settingsGameTimeWarningSoundLabel: 'Son d’alerte de fin de manche',
+  settingsVibrationLabel: 'Vibration',
   settingsStartButton: 'Commencer le match',
 
   matchGameLabel: 'Manche {{n}}',
@@ -304,6 +308,7 @@ const es: Record<TranslationKey, string> = {
   settingsSoundSectionTitle: 'Sonido',
   settingsShotClockSoundLabel: 'Sonido del reloj de tiro',
   settingsGameTimeWarningSoundLabel: 'Sonido de aviso de fin de partida',
+  settingsVibrationLabel: 'Vibración',
   settingsStartButton: 'Iniciar partido',
 
   matchGameLabel: 'Partida {{n}}',
