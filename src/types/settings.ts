@@ -40,7 +40,10 @@ export const LIMITS = {
   shotSeconds: { min: 5, max: 120 },
   extensionSeconds: { min: 0, max: 120 },
   extensionsPerGame: { min: 0, max: 5 },
-  totalMatchMinutes: { min: 1, max: 999 },
-  totalGameMinutes: { min: 1, max: 120 },
+  // Both steppers move in 5-minute increments (see SettingsScreen), so their
+  // bounds are kept 5-minute-aligned too — otherwise the last step before a
+  // limit lands off the grid (e.g. clamping down to 1 instead of stopping at 5).
+  totalMatchMinutes: { min: 5, max: 995 },
+  totalGameMinutes: { min: 5, max: 120 },
   raceToGames: { min: 0, max: 21 },
 } as const;

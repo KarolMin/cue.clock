@@ -287,10 +287,9 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
 
   // Manually calls a foul on the current player for a reason other than the
   // shot clock running out (e.g. a rules violation) — tallied separately from
-  // time-out fouls. Immediately switches to the other player and loads their
-  // shot clock with the ball-in-hand bonus, without pausing the game/match
-  // clock — but (unlike a time-out foul) it doesn't start ticking on its
-  // own: the opponent's shot only starts once their panel is tapped.
+  // time-out fouls. Like a time-out foul, it immediately switches to the
+  // other player and starts their shot clock right away (with the ball-in-
+  // hand bonus) without pausing the game/match clock — no extra tap needed.
   const callFoul = useCallback(() => {
     warningFiredRef.current = false;
     lastTickSecondRef.current = null;
@@ -308,7 +307,7 @@ export function useMatchTimer(settings: Settings, callbacks: Callbacks = {}) {
           ...prev.totalOtherFouls,
           [prev.currentPlayer]: prev.totalOtherFouls[prev.currentPlayer] + 1,
         },
-        isRunning: false,
+        isRunning: prev.isMatchRunning,
       };
     });
   }, [settings.shotSeconds]);
